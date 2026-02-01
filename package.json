@@ -1,0 +1,24 @@
+{
+    "name": "ethereal-contracts",
+    "version": "1.0.0",
+    "description": "Smart contracts for Ethereal Realm",
+    "scripts": {
+        "test": "hardhat test",
+        "compile": "hardhat compile",
+        "deploy:local": "hardhat run scripts/deploy.cjs --network localhost",
+        "deploy:bsc-testnet": "hardhat run deploy/deploy-bsc-testnet.cjs --network bscTestnet",
+        "node": "hardhat node"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+        "dotenv": "^17.2.3",
+        "hardhat": "^2.22.18"
+    },
+    "dependencies": {
+        "@chainlink/contracts": "^1.4.0",
+        "@openzeppelin/contracts": "^5.4.0"
+    }
+}

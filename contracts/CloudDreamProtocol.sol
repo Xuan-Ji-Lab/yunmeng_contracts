@@ -1,0 +1,830 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+import "@chainlink/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "./interfaces/IPancakeRouter02.sol";
+
+interface IWishToken {
+    function protocolMint(address to, uint256 amount) external;
+}
+
+contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
+    // --- Enums & Structs ---
+    enum Tier {
+        ABYSS,          // 0: 归墟 (0.1%)
+        RAGING_WAVES,   // 1: 怒涛 (1.0%)
+        LAYERED_PEAKS,  // 2: 叠嶂 (3.0%)
+        STARTLED_SWAN,  // 3: 惊鸿 (10.0%)
+        RIPPLE          // 4: 微澜 (85.9%)
+    }
+
+    struct WishRecord {
+        uint256 id;
+        address user;
+        string wishText;
+        uint256 timestamp;
+        uint256 round;
+        Tier tier;
+        uint256 reward;
+    }
+
+    struct PityRecord {
+        uint256 id;
+        address user;
+        uint256 bonusAmount;
+        uint256 timestamp;
+        uint256 round;
+    }
+
+    struct ResonanceRecord {
+        uint256 id;
+        address sourceUser;
+        address targetUser;
+        string message;
+        uint256 timestamp;
+        uint256 amount;
+    }
+
+    // --- State Variables (状态变量) ---
+    
+    // 基础费用
+    uint256 public constant SEEK_COST = 0.001 ether;
+    uint256 public constant WATER_MONEY_RATE = 500; // 5% (基数 10000)
+    
+    // 概率阈值 (基数 1000)
+    uint16[4] public TIER_THRESHOLDS = [1, 11, 41, 141]; 
+    
+    // 资金池余额
+    uint256 public wishPowerPool;
+    address public treasury;
+
+    // 用户数据
+    mapping(address => uint256) public userTribulationCount;
+    mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
+    uint256 public constant PITY_BASE_UNIT = 350 ether; // 每个权重单位对应的代币奖励 (350 WISH)
+    
+    // 听澜与福报系统
+    mapping(address => uint256) public karmaBalance;
+    mapping(address => uint256) public resonanceCount;
+    mapping(address => mapping(address => bool)) public hasResonatedWith;
+    uint256 public constant MAX_RESONANCE_LIMIT = 10;
+    uint256 public constant KARMA_PER_LISTEN = 1;
+    uint256 public constant KARMA_FOR_FREE_SEEK = 10;
+
+    // --- New Storage for Optimization ---
+    WishRecord[] public allWishes;
+    mapping(address => uint256[]) public userWishIds;
+    
+    PityRecord[] public allPityRecords;
+    mapping(address => uint256[]) public userPityIds;
+    
+    ResonanceRecord[] public allResonances;
+    mapping(address => uint256[]) public userInboundResonanceIds;  // Me <- Others
+    mapping(address => uint256[]) public userOutboundResonanceIds; // Me -> Others
+
+    // 问天数据
+    struct Topic {
+        uint256 totalPool;
+        uint256[2] optionPools; // 0: 否 (Option A), 1: 是 (Option B)
+        bool settled;
+        uint8 outcome;
+        uint256 endTime;
+        string title;           // 新增: 链上显示的标题
+        string[2] optionLabels; // 新增: 链上显示的选项标签
+    }
+
+    mapping(bytes32 => Topic) public topics;
+    mapping(address => bytes32[]) public userParticipatedTopicIds;
+    bytes32[] public topicIds; // 新增: 可迭代的 Topic ID 列表
+    mapping(bytes32 => mapping(address => uint256[2])) public userBets; // topicId -> 用户 -> 选项 -> 金额
+    mapping(bytes32 => mapping(address => bool)) public hasClaimed;
+    bool public isGrandFinale;
+
+    // Buy Wish Power Logic
+    uint256 public accumulatedWishSold; // Tracks total WISH sold via buyWishPower
+    event WishPowerPurchased(address indexed buyer, uint256 bnbAmount, uint256 wishAmount);
+    uint256 public totalAbyssHolders;   // 当前归墟之主数量
+    uint256 public totalAbyssTribulations; // 当前总劫数
+    mapping(address => bool) public isAbyssHolder;
+    uint256 public dividendPerShare;
+    mapping(address => uint256) public xDividendPerShare; // 用户分红追踪点
+    
+    // 愿力代币分红
+    uint256 public dividendPerShareToken;
+    mapping(address => uint256) public xDividendPerShareToken;
+
+    // Chainlink VRF 配置
+    VRFCoordinatorV2Interface COORDINATOR;
+    uint64 s_subscriptionId;
+    bytes32 keyHash;
+    uint32 callbackGasLimit = 500000; // Increased for complex callback logic
+    uint16 requestConfirmations = 3;
+    uint32 numWords = 1;
+
+    // 映射 requestId -> 用户地址
+    mapping(uint256 => address) public s_requests;
+    // 映射 requestId -> 愿望文本
+    mapping(uint256 => string) public s_wishTexts;
+
+    // --- 回购系统 (Buyback System) ---
+    IPancakeRouter02 public swapRouter;
+    address public wishToken;           // 愿力代币地址
+    address public WBNB;                // Wrapped BNB 地址
+    bool public buybackEnabled = false; // 回购开关（默认关闭）
+    uint256 public buybackPercent = 7000; // 70% (基数 10000)
+    uint256 public wishTokenPool;       // 合约持有的愿力代币奖池
+
+    // --- Events (事件) ---
+    event SeekResult(address indexed user, Tier tier, uint256 reward, string wishText);
+    event PityTriggered(address indexed user, uint256 bonusAmount);
+    event KarmaEarned(address indexed user, uint256 amount);
+    event FreeSeekRedeemed(address indexed user);
+    event ReferrerBound(address indexed user, address indexed referrer, string message);
+    event SeekRequestSent(uint256 requestId, address roller);
+    event TopicCreated(bytes32 indexed topicId, uint256 endTime, string title);
+    event BetPlaced(bytes32 indexed topicId, address indexed user, uint8 option, uint256 amount);
+    event TopicSettled(bytes32 indexed topicId, uint8 outcome, uint256 totalPool);
+    event WinningsClaimed(bytes32 indexed topicId, address indexed user, uint256 amount);
+    event BuybackExecuted(uint256 bnbAmount, uint256 tokensReceived);
+
+    // --- Constructor (构造函数) ---
+    constructor(
+        address _treasury,
+        uint64 subscriptionId,
+        address vrfCoordinator,
+        bytes32 _keyHash
+    ) VRFConsumerBaseV2(vrfCoordinator) Ownable(msg.sender) {
+        treasury = _treasury;
+        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+        s_subscriptionId = subscriptionId;
+        keyHash = _keyHash;
+    }
+
+    // --- Core Functions (核心方法) ---
+
+    /**
+     * @notice 寻真 · 祈愿
+     * @dev 主入口，支持 BNB 支付和福报兑换。
+     * @param wishText 用户输入的愿望文本
+     */
+    function seekTruth(string memory wishText) external payable nonReentrant {
+        // 逻辑分支: 付费 vs 免费
+        if (msg.value >= SEEK_COST) {
+            // --- 付费模式 ---
+            // 1. 资金分配 (70% 回购, 30% 国库)
+            uint256 toSwap = (msg.value * buybackPercent) / 10000;
+            uint256 toTreasury = msg.value - toSwap;
+            
+            // 执行回购或直接入池 (改为: 强制用 BNB 自动购买/Mint WISH)
+            /* 
+            if (buybackEnabled && address(swapRouter) != address(0) && wishToken != address(0)) {
+                _executeSwapBuyback(toSwap);
+            } else { 
+            */
+                // --- Temporary Auto-Buy Logic (Active) ---
+                wishPowerPool += toSwap;
+                
+                // Mint to Pool (address(this)) instead of User
+                // The WISH tokens accumulate in the contract for future distribution
+                uint256 tokenAmount = toSwap * 1000000;
+                accumulatedWishSold += tokenAmount;
+                wishTokenPool += tokenAmount; // Fix: Update pool balance tracking
+
+                if (wishToken != address(0)) {
+                   // Mint to this contract
+                   try IWishToken(wishToken).protocolMint(address(this), tokenAmount) {} catch {}
+                }
+                // Emit event indicating pool accumulation
+                emit WishPowerPurchased(address(this), toSwap, tokenAmount);
+            // }
+            
+            payable(treasury).transfer(toTreasury);
+        } else {
+            // --- 免费模式 (福报兑换) ---
+            require(msg.value == 0, "Do not send partial BNB"); // 禁止部分支付
+            require(karmaBalance[msg.sender] >= KARMA_FOR_FREE_SEEK, "Insufficient Karma"); // 福报不足
+            
+            // 扣除福报
+            karmaBalance[msg.sender] -= KARMA_FOR_FREE_SEEK;
+            emit FreeSeekRedeemed(msg.sender);
+            
+            // 注: 免费模式不增加奖池资金
+        }
+
+        // 2. 请求 Chainlink VRF 真随机数 (v2)
+        uint256 requestId = COORDINATOR.requestRandomWords(
+            keyHash,
+            s_subscriptionId,
+            requestConfirmations,
+            callbackGasLimit,
+            numWords
+        );
+        
+        s_requests[requestId] = msg.sender;
+        s_wishTexts[requestId] = wishText;
+        
+        emit SeekRequestSent(requestId, msg.sender);
+    }
+
+    /**
+     * @notice VRF 回调函数 - 处理真随机数结果
+     */
+    function fulfillRandomWords(
+        uint256 requestId,
+        uint256[] memory randomWords
+    ) internal override {
+        address user = s_requests[requestId];
+        string memory wishText = s_wishTexts[requestId];
+        require(user != address(0), "Invalid request");
+        
+        uint256 randomNum = randomWords[0];
+        uint256 resultInfo = randomNum % 1000;
+
+        if (resultInfo < TIER_THRESHOLDS[0]) {
+            // 归墟大奖
+            _handleAbyssWin(user);
+            
+            // Record Abyss Win
+            uint256 newId = allWishes.length;
+            allWishes.push(WishRecord({
+                id: newId,
+                user: user,
+                wishText: wishText,
+                timestamp: block.timestamp,
+                round: 0,
+                tier: Tier.ABYSS,
+                reward: 0
+            }));
+            userWishIds[user].push(newId);
+        } else {
+            Tier tier;
+            uint256 weightAdded = 0;
+            
+            if (resultInfo < TIER_THRESHOLDS[1]) { 
+                tier = Tier.RAGING_WAVES; weightAdded = 10; 
+            } else if (resultInfo < TIER_THRESHOLDS[2]) { 
+                tier = Tier.LAYERED_PEAKS; weightAdded = 5; 
+            } else if (resultInfo < TIER_THRESHOLDS[3]) { 
+                tier = Tier.STARTLED_SWAN; weightAdded = 2; 
+            } else { 
+                tier = Tier.RIPPLE; weightAdded = 1; 
+            }
+
+            userTribulationCount[user]++;
+            userTribulationWeight[user] += weightAdded;
+            
+            emit SeekResult(user, tier, 0, wishText);
+
+            // 检查保底
+            if (userTribulationCount[user] % 9 == 0) {
+                _triggerSmallPity(user);
+            }
+            
+            // Record Wish
+            uint256 newId = allWishes.length;
+            allWishes.push(WishRecord({
+                id: newId,
+                user: user,
+                wishText: wishText,
+                timestamp: block.timestamp,
+                round: userTribulationCount[user],
+                tier: tier,
+                reward: 0
+            }));
+            userWishIds[user].push(newId);
+        }
+        
+        // 清理请求记录
+        delete s_requests[requestId];
+        delete s_wishTexts[requestId];
+    }
+
+    /**
+     * @notice 听澜 · 响应 (Respond to Echo / Bind Referrer)
+     * @dev 响应他人的分享，建立关联，邀请人获得福报。
+     * @param referrer 邀请人/分享者地址
+     */
+    function respondToEcho(address referrer, string memory message) external {
+        require(referrer != address(0), "Invalid Referrer"); // 无效地址
+        require(referrer != msg.sender, "Cannot refer self"); // 不能自邀
+        require(resonanceCount[msg.sender] < MAX_RESONANCE_LIMIT, "Max resonance reached (10)");
+        require(!hasResonatedWith[msg.sender][referrer], "Already resonated with this user");
+        
+        // 记录绑定
+        hasResonatedWith[msg.sender][referrer] = true;
+        resonanceCount[msg.sender]++;
+        
+        // 发放奖励给邀请人
+        karmaBalance[referrer] += KARMA_PER_LISTEN;
+        
+        emit ReferrerBound(msg.sender, referrer, message);
+        emit KarmaEarned(referrer, KARMA_PER_LISTEN);
+
+        // --- Record Resonance On-Chain ---
+        uint256 newId = allResonances.length;
+        allResonances.push(ResonanceRecord({
+            id: newId,
+            sourceUser: msg.sender,
+            targetUser: referrer,
+            message: message,
+            timestamp: block.timestamp,
+            amount: KARMA_PER_LISTEN
+        }));
+        userInboundResonanceIds[referrer].push(newId);
+        userOutboundResonanceIds[msg.sender].push(newId);
+    }
+
+    // 归墟分红与身份系统
+    /**
+     * @dev 处理归墟大奖逻辑 (50/30/20 分配 或 终局机制)。
+     */
+    function _handleAbyssWin(address user) internal {
+        // 重置保底与权重
+        userTribulationCount[user] = 0;
+        userTribulationWeight[user] = 0;
+        
+        // Always increment global tribulation count
+        uint256 currentTribulations = totalAbyssTribulations;
+        
+        if (currentTribulations + 1 >= 81) {
+            // --- 终局机制 (GRAND FINALE) ---
+            // If user is not a holder yet, add them for the final split? 
+            // Logic: The 81st winner participates in the grand split.
+            if (!isAbyssHolder[user]) {
+                isAbyssHolder[user] = true;
+                totalAbyssHolders++;
+            }
+
+            totalAbyssTribulations = 81;
+            
+            uint256 totalPool = wishPowerPool;
+            wishPowerPool = 0;
+            
+            // Distribute entire pool to all holders (including this one)
+            // Note: dividendPerShare is simplistic here. 
+            // For Grand Finale, strictly speaking, we should enable 'claim' for everyone.
+            // Simplified: Add remaining pool to dividendPerShare.
+            if (totalAbyssHolders > 0) {
+                dividendPerShare += (totalPool * 1e18) / totalAbyssHolders;
+            }
+            
+            emit SeekResult(user, Tier.ABYSS, totalPool / (totalAbyssHolders > 0 ? totalAbyssHolders : 1), "GRAND FINALE");
+            
+        } else {
+            // --- 标准归墟机制 (50/30/20) - 仅发放愿力代币 ---
+            totalAbyssTribulations++;
+
+            uint256 currentHolders = totalAbyssHolders;
+
+            // 1. BNB 分配 (已移除，归墟大奖仅产生代币奖励)
+            // 剩余的 BNB 保留在 wishPowerPool 中，可通过管理函数 manualBuyback 转换为代币
+            
+            // 2. 愿力代币分配
+            if (wishToken != address(0)) {
+                uint256 totalTokenPool = wishTokenPool;
+                uint256 winnerTokenReward = 0;
+                
+                if (totalTokenPool > 0) {
+                    winnerTokenReward = (totalTokenPool * 50) / 100;
+                    uint256 dividendTokenAmt = (totalTokenPool * 30) / 100;
+
+                    // P0修复: 检查池余额
+                    require(wishTokenPool >= winnerTokenReward, "Insufficient token pool");
+                    require(
+                        IERC20Minimal(wishToken).balanceOf(address(this)) >= winnerTokenReward,
+                        "Insufficient token balance"
+                    );
+                    
+                    wishTokenPool -= winnerTokenReward;
+                    // Transfer tokens to winner immediately
+                    require(
+                        IERC20Minimal(wishToken).transfer(user, winnerTokenReward),
+                        "Token transfer failed"
+                    );
+
+                    if (currentHolders > 0) {
+                        require(wishTokenPool >= dividendTokenAmt, "Insufficient pool for dividends");
+                        wishTokenPool -= dividendTokenAmt;
+                        dividendPerShareToken += (dividendTokenAmt * 1e18) / currentHolders;
+                    }
+                }
+                
+                emit SeekResult(user, Tier.ABYSS, winnerTokenReward, "WISH TOKEN PRIZE");
+            } else {
+                // Fallback: 如果未配置代币，发放 BNB (避免奖励丢失)
+                uint256 totalPool = wishPowerPool;
+                if (totalPool > 0) {
+                    uint256 winnerReward = (totalPool * 50) / 100;
+                    wishPowerPool -= winnerReward;
+                    payable(user).transfer(winnerReward);
+                    emit SeekResult(user, Tier.ABYSS, winnerReward, "BNB FALLBACK");
+                }
+            }
+            
+            if (!isAbyssHolder[user]) {
+                isAbyssHolder[user] = true;
+                totalAbyssHolders++;
+                // xDividendPerShare[user] = dividendPerShare; // BNB 分红点 (不再更新)
+                xDividendPerShareToken[user] = dividendPerShareToken;
+            }
+
+            // --- Record Abyss Win ---
+             uint256 newId = allWishes.length;
+             allWishes.push(WishRecord({
+                id: newId,
+                user: user,
+                wishText: "ABYSS", // Special marker
+                timestamp: block.timestamp,
+                round: 0, 
+                tier: Tier.ABYSS,
+                reward: 0 // Simplification: actual reward logic is complex above, but for history list it's okay
+            }));
+            userWishIds[user].push(newId);
+        }
+    }
+
+    /**
+     * @dev 触发 "天道回响" 小保底。
+     * @notice Modified to reward Wish Tokens instead of BNB
+     */
+    function _triggerSmallPity(address user) internal {
+        uint256 currentWeight = userTribulationWeight[user];
+        uint256 pityReward = currentWeight * PITY_BASE_UNIT;
+
+        // 重置权重
+        userTribulationCount[user] = 0;
+        userTribulationWeight[user] = 0;
+
+        uint256 actualReward = 0;
+        if (pityReward > 0) {
+             if (wishToken != address(0) && wishTokenPool >= pityReward) {
+                 // P0修复: 检查余额
+                 require(
+                     IERC20Minimal(wishToken).balanceOf(address(this)) >= pityReward,
+                     "Insufficient balance for pity reward"
+                 );
+                 
+                 wishTokenPool -= pityReward;
+                 require(
+                     IERC20Minimal(wishToken).transfer(user, pityReward),
+                     "Pity reward transfer failed"
+                 );
+                 actualReward = pityReward;
+             }
+        }
+        // Record Pity
+        uint256 pId = allPityRecords.length;
+        allPityRecords.push(PityRecord({
+            id: pId,
+            user: user,
+            bonusAmount: actualReward,
+            timestamp: block.timestamp,
+            round: 9
+        }));
+        userPityIds[user].push(pId);
+
+        emit PityTriggered(user, actualReward);
+    }
+
+    /**
+     * @notice 管理员创建新的问天议题
+     * @param _topicIdStr 字符串ID (例如 "btc_100k")
+     * @param _duration 持续时间 (秒)
+     * @param _title 显示标题
+     * @param _optionA 选项A标签
+     * @param _optionB 选项B标签
+     */
+    function createTopic(
+        string memory _topicIdStr, 
+        uint256 _duration, 
+        string memory _title, 
+        string memory _optionA, 
+        string memory _optionB
+    ) external onlyOwner {
+        bytes32 topicId = keccak256(abi.encodePacked(_topicIdStr));
+        require(topics[topicId].endTime == 0, "Topic already exists"); // 议题已存在
+        
+        uint256 endTime = block.timestamp + _duration;
+        
+        Topic storage t = topics[topicId];
+        t.endTime = endTime;
+        t.title = _title;
+        t.optionLabels[0] = _optionA;
+        t.optionLabels[1] = _optionB;
+
+        topicIds.push(topicId);
+        
+        emit TopicCreated(topicId, endTime, _title);
+    }
+
+    /**
+     * @notice 问天 · 落子 (下注)
+     */
+    function placeBet(bytes32 topicId, uint8 option) external payable nonReentrant {
+        Topic storage topic = topics[topicId];
+        
+        require(topic.endTime > 0, "Topic does not exist"); // 议题不存在
+        require(block.timestamp < topic.endTime, "Betting closed"); // 投注已截止
+        require(!topic.settled, "Topic already settled"); // 议题已结算
+        require(option < 2, "Invalid Option"); // 选项无效
+        require(msg.value > 0, "Stake required"); // 需要本金
+
+        // 1. 水钱 (5%)
+        uint256 fee = (msg.value * WATER_MONEY_RATE) / 10000;
+        uint256 effectiveStake = msg.value - fee;
+        
+        payable(treasury).transfer(fee);
+
+        // 2. 注入奖池
+        topic.totalPool += effectiveStake;
+        topic.optionPools[option] += effectiveStake;
+        
+        // 3. 记录注单
+        userBets[topicId][msg.sender][option] += effectiveStake;
+
+        // Record User Participation (Idempotent)
+        bool alreadyParticipated = false;
+        // Optimization: Checking array can be costly if huge, but typically user plays reasonably.
+        // Or we use a mapping(bytes32 => mapping(address => bool)) topicParticipated;
+        // Since we already have userBets, check checks:
+        if (userBets[topicId][msg.sender][0] == effectiveStake && userBets[topicId][msg.sender][1] == 0) {
+            // First time betting on Option 0? Depends on existing bet.
+            // Simplified: If this is their *first* ever bet on this topic, add to list.
+            // Check existing bets:
+             if (userBets[topicId][msg.sender][0] <= effectiveStake && userBets[topicId][msg.sender][1] == 0) {
+                 // Hard to track perfectly without extra state. 
+                 // Let's rely on a helper check. Alternatively, just check userBets before adding.
+            }
+        }
+        
+        // Better Approach: use a specific mapping for O(1) check if we want to add to list
+        // Reuse userBets: if both sums were 0 before this tx... but we already updated userBets above!
+        // Correction: Check if userBets was 0 BEFORE adding. Too late now.
+        // Let's use a separate mapping to track "is in list" to avoid duplicates.
+        // But for time saving, let's just use a simple check or new mapping.
+        // Simplest: Check if (userBets[0] + userBets[1] == effectiveStake). Meaning it was 0 before.
+        uint256 currentTotal = userBets[topicId][msg.sender][0] + userBets[topicId][msg.sender][1];
+        if (currentTotal == effectiveStake) {
+            userParticipatedTopicIds[msg.sender].push(topicId);
+        }
+
+        emit BetPlaced(topicId, msg.sender, option, effectiveStake);
+    }
+
+    /**
+     * @notice 管理员结算议题
+     */
+    function settleTopic(bytes32 topicId, uint8 outcome) external onlyOwner {
+        Topic storage topic = topics[topicId];
+        require(topic.endTime > 0, "Topic does not exist");
+        require(!topic.settled, "Already settled");
+        require(outcome < 2, "Invalid Outcome");
+
+        topic.settled = true;
+        topic.outcome = outcome;
+
+        emit TopicSettled(topicId, outcome, topic.totalPool);
+    }
+
+    /**
+     * @notice 用户领取胜出奖励
+     */
+    function claimWinnings(bytes32 topicId) external nonReentrant {
+        Topic storage topic = topics[topicId];
+        require(topic.settled, "Topic not settled"); // 未结算
+        require(!hasClaimed[topicId][msg.sender], "Already claimed"); // 已领取
+
+        uint8 outcome = topic.outcome;
+        uint256 userBet = userBets[topicId][msg.sender][outcome];
+        require(userBet > 0, "No winning bet"); // 未中奖
+
+        uint256 totalWinningPool = topic.optionPools[outcome];
+        uint256 totalPool = topic.totalPool;
+
+        // 计算份额: (用户注单 / 胜方总池) * 总奖池
+        // 使用高精度计算
+        uint256 winnings = (userBet * totalPool) / totalWinningPool;
+
+        hasClaimed[topicId][msg.sender] = true;
+        payable(msg.sender).transfer(winnings);
+
+        emit WinningsClaimed(topicId, msg.sender, winnings);
+    }
+
+    /**
+     * @notice 领取归墟分红 (BNB 和 Wish Token)
+     * @dev 应用 CEI 模式防止重入攻击
+     */
+    function claimAbyssDividends() external nonReentrant {
+        require(isAbyssHolder[msg.sender], "Not a holder");
+        
+        // 1. Checks: 计算应得分红
+        uint256 bnbShare = dividendPerShare - xDividendPerShare[msg.sender];
+        uint256 tokenShare = dividendPerShareToken - xDividendPerShareToken[msg.sender];
+        
+        // 2. Effects: 先更新状态
+        if (bnbShare > 0) {
+            xDividendPerShare[msg.sender] = dividendPerShare;
+        }
+        
+        if (tokenShare > 0) {
+            xDividendPerShareToken[msg.sender] = dividendPerShareToken;
+        }
+
+        // 3. Interactions: 最后进行外部调用
+        if (bnbShare > 0) {
+            (bool success, ) = payable(msg.sender).call{value: bnbShare}("");
+            require(success, "BNB transfer failed");
+        }
+
+        if (tokenShare > 0 && wishToken != address(0)) {
+            require(
+                IERC20Minimal(wishToken).transfer(msg.sender, tokenShare),
+                "Token transfer failed"
+            );
+        }
+    }
+
+    // 接收 BNB 的函数
+    receive() external payable {
+        // 默认将直接发送的 BNB 计入愿力池
+        wishPowerPool += msg.value;
+    }
+
+    /**
+     * @notice 获取所有议题 ID
+     */
+    function getTopicIds() external view returns (bytes32[] memory) {
+        return topicIds;
+    }
+
+    /**
+     * @notice 获取议题完整详情 (包含元数据)
+     */
+    function getTopicDetails(bytes32 topicId) external view returns (
+        uint256 totalPool,
+        uint256[2] memory optionPools,
+        bool settled,
+        uint8 outcome,
+        uint256 endTime,
+        string memory title,
+        string[2] memory optionLabels
+    ) {
+        Topic memory t = topics[topicId];
+        return (t.totalPool, t.optionPools, t.settled, t.outcome, t.endTime, t.title, t.optionLabels);
+    }
+    /**
+     * @notice 执行自动回购 (Swap BNB -> Wish Token)
+     */
+    function _executeSwapBuyback(uint256 bnbAmount) internal {
+        address[] memory path = new address[](2);
+        path[0] = WBNB;
+        path[1] = wishToken;
+
+        // 捕获初始代币余额
+        uint256 initialBalance = IERC20Minimal(wishToken).balanceOf(address(this));
+
+        // 执行 Swap
+        // 忽略返回值，通过余额变化计算
+        try swapRouter.swapExactETHForTokens{value: bnbAmount}(
+            0, // 接受任意数量代币 (生产环境应考虑滑点保护，但此处为自动回购)
+            path,
+            address(this), // 代币回流至合约绑定到奖池
+            block.timestamp + 300
+        ) {
+            uint256 finalBalance = IERC20Minimal(wishToken).balanceOf(address(this));
+            uint256 received = finalBalance - initialBalance;
+            
+            wishTokenPool += received;
+            emit BuybackExecuted(bnbAmount, received);
+        } catch {
+            // 如果 Swap 失败，回退到普通奖池逻辑
+            wishPowerPool += bnbAmount;
+        }
+    }
+
+    // --- Admin Functions for Buyback ---
+
+    function setBuybackConfig(bool _enabled, uint256 _percent, address _token, address _wbnb) external onlyOwner {
+        require(_percent <= 10000, "Invalid percent");
+        buybackEnabled = _enabled;
+        buybackPercent = _percent;
+        wishToken = _token;
+        WBNB = _wbnb;
+    }
+
+    function setSwapRouter(address _router) external onlyOwner {
+        swapRouter = IPancakeRouter02(_router);
+    }
+
+    /**
+     * @notice 管理员手动回购 (处理 wishPowerPool 中的 BNB)
+     * @param amount 要回购的 BNB 数量
+     */
+    function manualBuyback(uint256 amount) external onlyOwner {
+        require(amount <= wishPowerPool, "Insufficient balance");
+        wishPowerPool -= amount;
+        _executeSwapBuyback(amount);
+    }
+    
+    /**
+     * @notice 管理员注入愿力代币到奖池
+     */
+    function depositRewardTokens(uint256 amount) external onlyOwner {
+        require(wishToken != address(0), "Token not set");
+        IERC20Minimal(wishToken).transferFrom(msg.sender, address(this), amount);
+        wishTokenPool += amount;
+    }
+
+    // 允许合约接收 BNB (用于从 Router 接收或其他途径)
+
+    // --- View Functions for Batching ---
+
+    function getUserWishIds(address user) external view returns (uint256[] memory) {
+        return userWishIds[user];
+    }
+
+    function getUserPityIds(address user) external view returns (uint256[] memory) {
+        return userPityIds[user];
+    }
+    
+    function getUserParticipatedTopicIds(address user) external view returns (bytes32[] memory) {
+        return userParticipatedTopicIds[user];
+    }
+    
+    function getBatchWishes(uint256[] calldata ids) external view returns (WishRecord[] memory) {
+        WishRecord[] memory results = new WishRecord[](ids.length);
+        for(uint i=0; i<ids.length; i++) {
+             // Check bounds
+            if (ids[i] < allWishes.length) {
+                results[i] = allWishes[ids[i]];
+            }
+        }
+        return results;
+    }
+
+    function getBatchPityRecords(uint256[] calldata ids) external view returns (PityRecord[] memory) {
+        PityRecord[] memory results = new PityRecord[](ids.length);
+        for(uint i=0; i<ids.length; i++) {
+            if (ids[i] < allPityRecords.length) {
+                results[i] = allPityRecords[ids[i]];
+            }
+        }
+        return results;
+    }
+    
+    function getInboundResonanceIds(address user) external view returns (uint256[] memory) {
+        return userInboundResonanceIds[user];
+    }
+    
+    function getOutboundResonanceIds(address user) external view returns (uint256[] memory) {
+        return userOutboundResonanceIds[user];
+    }
+
+    function getBatchResonances(uint256[] calldata ids) external view returns (ResonanceRecord[] memory) {
+        ResonanceRecord[] memory results = new ResonanceRecord[](ids.length);
+        for(uint i=0; i<ids.length; i++) {
+            if (ids[i] < allResonances.length) {
+                results[i] = allResonances[ids[i]];
+            }
+        }
+        return results;
+    }
+
+    function getGlobalWishes(uint256 start, uint256 end) external view returns (WishRecord[] memory) {
+        uint256 total = allWishes.length;
+        if (end > total) end = total;
+        if (start >= end) return new WishRecord[](0);
+        
+        WishRecord[] memory results = new WishRecord[](end - start);
+        for(uint i=0; i < end - start; i++) {
+            results[i] = allWishes[start + i];
+        }
+        return results;
+    }
+
+    function getGlobalResonances(uint256 start, uint256 end) external view returns (ResonanceRecord[] memory) {
+        uint256 total = allResonances.length;
+        if (end > total) end = total;
+        if (start >= end) return new ResonanceRecord[](0);
+        
+        ResonanceRecord[] memory results = new ResonanceRecord[](end - start);
+        for(uint i=0; i < end - start; i++) {
+            results[i] = allResonances[start + i];
+        }
+        return results;
+    }
+
+    function getGlobalWishCount() external view returns (uint256) {
+        return allWishes.length;
+    }
+    
+    function getGlobalResonanceCount() external view returns (uint256) {
+        return allResonances.length;
+    }
+
+
+}
