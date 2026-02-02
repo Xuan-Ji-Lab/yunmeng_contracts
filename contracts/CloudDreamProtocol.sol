@@ -712,7 +712,14 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
      */
     function depositRewardTokens(uint256 amount) external onlyOwner {
         require(wishToken != address(0), "Token not set");
+        require(amount > 0, "Amount must be positive");
+        
+        // 验证转账前后余额变化
+        uint256 balanceBefore = IERC20Minimal(wishToken).balanceOf(address(this));
         IERC20Minimal(wishToken).transferFrom(msg.sender, address(this), amount);
+        uint256 balanceAfter = IERC20Minimal(wishToken).balanceOf(address(this));
+        
+        require(balanceAfter - balanceBefore == amount, "Transfer amount mismatch");
         wishTokenPool += amount;
     }
 
