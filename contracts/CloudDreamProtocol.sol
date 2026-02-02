@@ -639,7 +639,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
 
         // 3. Interactions: 最后进行外部调用
         if (bnbShare > 0) {
-            (bool success, ) = payable(msg.sender).call{value: bnbShare}("");
+            (bool success, ) = payable(msg.sender).call{value: bnbShare, gas: 2300}("");
             require(success, "BNB transfer failed");
         }
 
