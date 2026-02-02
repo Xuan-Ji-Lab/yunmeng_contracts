@@ -690,12 +690,15 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         // 捕获初始代币余额
         uint256 initialBalance = IERC20Minimal(wishToken).balanceOf(address(this));
 
+        // 添加滑点保护 (5%)
+        uint256[] memory expectedAmounts = swapRouter.getAmountsOut(bnbAmount, path);
+        uint256 minAmount = (expectedAmounts[1] * 95) / 100; // 5% 滑点容忍
+
         // 执行 Swap
-        // 忽略返回值，通过余额变化计算
         try swapRouter.swapExactETHForTokens{value: bnbAmount}(
-            0, // 接受任意数量代币 (生产环境应考虑滑点保护，但此处为自动回购)
+            minAmount, // ✅ 最小输出保护
             path,
-            address(this), // 代币回流至合约绑定到奖池
+            address(this),
             block.timestamp + 300
         ) {
             uint256 finalBalance = IERC20Minimal(wishToken).balanceOf(address(this));
@@ -704,7 +707,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
             wishTokenPool += received;
             emit BuybackExecuted(bnbAmount, received);
         } catch {
-            // 如果 Swap 失败，回退到普通奖池逻辑
+            // 如果 Swap 失败（滑点过大或流动性不足），回退到普通奖池
             wishPowerPool += bnbAmount;
         }
     }
