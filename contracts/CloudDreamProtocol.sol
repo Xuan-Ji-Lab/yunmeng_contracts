@@ -363,13 +363,9 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
             uint256 totalPool = wishPowerPool;
             wishPowerPool = 0;
             
-            // Distribute entire pool to all holders (including this one)
-            // Note: dividendPerShare is simplistic here. 
-            // For Grand Finale, strictly speaking, we should enable 'claim' for everyone.
-            // Simplified: Add remaining pool to dividendPerShare.
-            if (totalAbyssHolders > 0) {
-                dividendPerShare += (totalPool * 1e18) / totalAbyssHolders;
-            }
+            // 终局时必有持有者（防御性编程）
+            assert(totalAbyssHolders > 0);
+            dividendPerShare += (totalPool * 1e18) / totalAbyssHolders;
             
             emit SeekResult(user, Tier.ABYSS, totalPool / (totalAbyssHolders > 0 ? totalAbyssHolders : 1), "GRAND FINALE");
             
