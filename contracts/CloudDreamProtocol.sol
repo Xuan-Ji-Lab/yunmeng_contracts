@@ -74,6 +74,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     mapping(address => uint256) public karmaBalance;
     mapping(address => uint256) public resonanceCount;
     mapping(address => mapping(address => bool)) public hasResonatedWith;
+    mapping(address => uint256) public lastResonanceTime; // 防滥用：冷却时间
     uint256 public constant MAX_RESONANCE_LIMIT = 10;
     uint256 public constant KARMA_PER_LISTEN = 1;
     uint256 public constant KARMA_FOR_FREE_SEEK = 10;
@@ -317,14 +318,21 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
      * @param referrer 邀请人/分享者地址
      */
     function respondToEcho(address referrer, string memory message) external {
-        require(referrer != address(0), "Invalid Referrer"); // 无效地址
-        require(referrer != msg.sender, "Cannot refer self"); // 不能自邀
+        require(referrer != address(0), "Invalid Referrer");
+        require(referrer != msg.sender, "Cannot refer self");
         require(resonanceCount[msg.sender] < MAX_RESONANCE_LIMIT, "Max resonance reached (10)");
         require(!hasResonatedWith[msg.sender][referrer], "Already resonated with this user");
+        
+        // 防滥用：冷却时间检查（1天）
+        require(
+            block.timestamp - lastResonanceTime[msg.sender] > 1 days,
+            "Cooldown active, please wait"
+        );
         
         // 记录绑定
         hasResonatedWith[msg.sender][referrer] = true;
         resonanceCount[msg.sender]++;
+        lastResonanceTime[msg.sender] = block.timestamp; // 更新冷却时间
         
         // 发放奖励给邀请人
         karmaBalance[referrer] += KARMA_PER_LISTEN;
