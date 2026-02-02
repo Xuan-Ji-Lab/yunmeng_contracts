@@ -66,6 +66,10 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
     uint256 public constant PITY_BASE_UNIT = 60 ether; // 每个权重单位对应的代币奖励 (60 WISH) - 确保协议经济安全
     
+    // 全服保底重置机制
+    uint256 public lastAbyssTimestamp; // 上次归墟发生的时间戳
+    mapping(address => uint256) public lastActivityTimestamp; // 用户最后活动时间
+    
     // 听澜与福报系统
     mapping(address => uint256) public karmaBalance;
     mapping(address => uint256) public resonanceCount;
@@ -141,6 +145,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // --- Events (事件) ---
     event SeekResult(address indexed user, Tier tier, uint256 reward, string wishText);
     event PityTriggered(address indexed user, uint256 bonusAmount);
+    event GlobalPityReset(uint256 timestamp); // 全服保底重置事件
     event KarmaEarned(address indexed user, uint256 amount);
     event FreeSeekRedeemed(address indexed user);
     event ReferrerBound(address indexed user, address indexed referrer, string message);
@@ -172,6 +177,9 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
      * @param wishText 用户输入的愿望文本
      */
     function seekTruth(string memory wishText) external payable nonReentrant {
+        // 检查并重置保底（如归墟发生）
+        _autoResetIfNeeded(msg.sender);
+        
         // 逻辑分支: 付费 vs 免费
         if (msg.value >= SEEK_COST) {
             // --- 付费模式 ---
@@ -339,13 +347,33 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     }
 
     // 归墟分红与身份系统
+    
+    /**
+     * @dev 全服保底重置检查（懒更新机制）
+     * @notice 如果用户上次活动早于最近一次归墟，自动重置其保底计数
+     */
+    function _autoResetIfNeeded(address user) internal {
+        if (lastActivityTimestamp[user] < lastAbyssTimestamp) {
+            // 该用户在归墟后首次活动，重置保底
+            userTribulationCount[user] = 0;
+            userTribulationWeight[user] = 0;
+        }
+        // 更新用户最后活动时间
+        lastActivityTimestamp[user] = block.timestamp;
+    }
+    
     /**
      * @dev 处理归墟大奖逻辑 (50/30/20 分配 或 终局机制)。
      */
     function _handleAbyssWin(address user) internal {
+        // 记录归墟时间戳（触发全服保底重置）
+        lastAbyssTimestamp = block.timestamp;
+        emit GlobalPityReset(block.timestamp);
+        
         // 重置保底与权重
         userTribulationCount[user] = 0;
         userTribulationWeight[user] = 0;
+        lastActivityTimestamp[user] = block.timestamp;
         
         // Always increment global tribulation count
         uint256 currentTribulations = totalAbyssTribulations;
