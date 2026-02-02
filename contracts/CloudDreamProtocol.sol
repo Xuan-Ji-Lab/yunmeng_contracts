@@ -619,8 +619,8 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         uint256 totalPool = topic.totalPool;
 
         // 计算份额: (用户注单 / 胜方总池) * 总奖池
-        // 使用高精度计算
-        uint256 winnings = (userBet * totalPool) / totalWinningPool;
+        // 使用高精度计算防止精度损失
+        uint256 winnings = (userBet * 1e18 * totalPool) / totalWinningPool / 1e18;
 
         hasClaimed[topicId][msg.sender] = true;
         payable(msg.sender).transfer(winnings);
