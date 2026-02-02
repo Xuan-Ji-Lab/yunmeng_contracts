@@ -483,35 +483,33 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         userTribulationCount[user] = 0;
         userTribulationWeight[user] = 0;
 
-        uint256 actualReward = 0;
-        if (pityReward > 0) {
-             if (wishToken != address(0) && wishTokenPool >= pityReward) {
-                 // P0修复: 检查余额
-                 require(
-                     IERC20Minimal(wishToken).balanceOf(address(this)) >= pityReward,
-                     "Insufficient balance for pity reward"
-                 );
-                 
-                 wishTokenPool -= pityReward;
-                 require(
-                     IERC20Minimal(wishToken).transfer(user, pityReward),
-                     "Pity reward transfer failed"
-                 );
-                 actualReward = pityReward;
-             }
+        // 简化逻辑：直接检查并发放
+        if (pityReward > 0 && wishToken != address(0)) {
+            require(wishTokenPool >= pityReward, "Insufficient pool for pity");
+            require(
+                IERC20Minimal(wishToken).balanceOf(address(this)) >= pityReward,
+                "Insufficient balance for pity"
+            );
+            
+            wishTokenPool -= pityReward;
+            require(
+                IERC20Minimal(wishToken).transfer(user, pityReward),
+                "Pity transfer failed"
+            );
         }
-        // Record Pity
+        
+        // 记录保底
         uint256 pId = allPityRecords.length;
         allPityRecords.push(PityRecord({
             id: pId,
             user: user,
-            bonusAmount: actualReward,
+            bonusAmount: pityReward,
             timestamp: block.timestamp,
             round: 9
         }));
         userPityIds[user].push(pId);
 
-        emit PityTriggered(user, actualReward);
+        emit PityTriggered(user, pityReward);
     }
 
     /**
