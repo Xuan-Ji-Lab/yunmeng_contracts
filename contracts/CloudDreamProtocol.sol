@@ -158,7 +158,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     event KarmaEarned(address indexed user, uint256 amount);
     event FreeSeekRedeemed(address indexed user);
     event ReferrerBound(address indexed user, address indexed referrer, string message);
-    event SeekRequestSent(uint256 requestId, address roller);
+    event SeekRequestSent(uint256 indexed requestId, address indexed roller);
     event TopicCreated(bytes32 indexed topicId, uint256 endTime, string title);
     event BetPlaced(bytes32 indexed topicId, address indexed user, uint8 option, uint256 amount);
     event TopicSettled(bytes32 indexed topicId, uint8 outcome, uint256 totalPool);
@@ -462,7 +462,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
                 // Fallback: 如果未配置代币，发放 BNB (避免奖励丢失)
                 uint256 totalPool = wishPowerPool;
                 if (totalPool > 0) {
-                    uint256 winnerReward = (totalPool * 50) / 100;
+                    uint256 winnerReward = (totalPool * ABYSS_WINNER_SHARE) / 100;
                     wishPowerPool -= winnerReward;
                     payable(user).transfer(winnerReward);
                     emit SeekResult(user, Tier.ABYSS, winnerReward, "BNB FALLBACK");
