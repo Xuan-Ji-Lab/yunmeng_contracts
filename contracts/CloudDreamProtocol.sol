@@ -101,6 +101,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     bytes32[] public topicIds; // 新增: 可迭代的 Topic ID 列表
     mapping(bytes32 => mapping(address => uint256[2])) public userBets; // topicId -> 用户 -> 选项 -> 金额
     mapping(bytes32 => mapping(address => bool)) public hasClaimed;
+    mapping(bytes32 => mapping(address => bool)) public hasParticipatedInTopic; // 追踪用户是否参与过该议题
     bool public isGrandFinale;
 
     // Buy Wish Power Logic
@@ -541,30 +542,10 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         // 3. 记录注单
         userBets[topicId][msg.sender][option] += effectiveStake;
 
-        // Record User Participation (Idempotent)
-        bool alreadyParticipated = false;
-        // Optimization: Checking array can be costly if huge, but typically user plays reasonably.
-        // Or we use a mapping(bytes32 => mapping(address => bool)) topicParticipated;
-        // Since we already have userBets, check checks:
-        if (userBets[topicId][msg.sender][0] == effectiveStake && userBets[topicId][msg.sender][1] == 0) {
-            // First time betting on Option 0? Depends on existing bet.
-            // Simplified: If this is their *first* ever bet on this topic, add to list.
-            // Check existing bets:
-             if (userBets[topicId][msg.sender][0] <= effectiveStake && userBets[topicId][msg.sender][1] == 0) {
-                 // Hard to track perfectly without extra state. 
-                 // Let's rely on a helper check. Alternatively, just check userBets before adding.
-            }
-        }
-        
-        // Better Approach: use a specific mapping for O(1) check if we want to add to list
-        // Reuse userBets: if both sums were 0 before this tx... but we already updated userBets above!
-        // Correction: Check if userBets was 0 BEFORE adding. Too late now.
-        // Let's use a separate mapping to track "is in list" to avoid duplicates.
-        // But for time saving, let's just use a simple check or new mapping.
-        // Simplest: Check if (userBets[0] + userBets[1] == effectiveStake). Meaning it was 0 before.
-        uint256 currentTotal = userBets[topicId][msg.sender][0] + userBets[topicId][msg.sender][1];
-        if (currentTotal == effectiveStake) {
+        // 4. 记录用户参与（仅首次）
+        if (!hasParticipatedInTopic[topicId][msg.sender]) {
             userParticipatedTopicIds[msg.sender].push(topicId);
+            hasParticipatedInTopic[topicId][msg.sender] = true;
         }
 
         emit BetPlaced(topicId, msg.sender, option, effectiveStake);
