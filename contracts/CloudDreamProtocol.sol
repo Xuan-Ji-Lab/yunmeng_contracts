@@ -57,6 +57,11 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 概率阈值 (基数 1000)
     uint16[4] public TIER_THRESHOLDS = [1, 11, 41, 141]; 
     
+    // 归墟分配比例 (百分比)
+    uint256 public constant ABYSS_WINNER_SHARE = 50;
+    uint256 public constant ABYSS_DIVIDEND_SHARE = 30;
+    uint256 public constant ABYSS_POOL_RESERVE_SHARE = 20;
+
     // 资金池余额
     uint256 public wishPowerPool;
     address public treasury;
@@ -428,8 +433,8 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
                 uint256 winnerTokenReward = 0;
                 
                 if (totalTokenPool > 0) {
-                    winnerTokenReward = (totalTokenPool * 50) / 100;
-                    uint256 dividendTokenAmt = (totalTokenPool * 30) / 100;
+                    winnerTokenReward = (totalTokenPool * ABYSS_WINNER_SHARE) / 100;
+                    uint256 dividendTokenAmt = (totalTokenPool * ABYSS_DIVIDEND_SHARE) / 100;
 
                     // P0修复: 检查池余额
                     require(wishTokenPool >= winnerTokenReward, "Insufficient token pool");
