@@ -18,6 +18,11 @@ contract WishPowerToken is ERC20, ERC20Burnable, Ownable {
     // 协议合约地址（可铸造代币）
     address public protocolContract;
     
+    // 铸造限速
+    uint256 public constant DAILY_MINT_LIMIT = 10_000_000 * 10**18;
+    uint256 public lastMintDay;
+    uint256 public dailyMintAmount;
+
     // 事件
     event ProtocolContractUpdated(address indexed oldContract, address indexed newContract);
     
@@ -39,11 +44,22 @@ contract WishPowerToken is ERC20, ERC20Burnable, Ownable {
     
     /**
      * @notice 协议铸造代币（仅限协议合约）
-     * @dev 用于特殊奖励场景
+     * @dev 用于特殊奖励场景，受每日限额保护
      */
     function protocolMint(address to, uint256 amount) external {
         require(msg.sender == protocolContract, "Only protocol can mint");
         require(totalSupply() + amount <= MAX_SUPPLY, "Exceeds max supply");
+        
+        // 每日限额检查
+        uint256 currentDay = block.timestamp / 1 days;
+        if (currentDay > lastMintDay) {
+            lastMintDay = currentDay;
+            dailyMintAmount = 0;
+        }
+        
+        require(dailyMintAmount + amount <= DAILY_MINT_LIMIT, "Daily mint limit exceeded");
+        
+        dailyMintAmount += amount;
         _mint(to, amount);
     }
     
