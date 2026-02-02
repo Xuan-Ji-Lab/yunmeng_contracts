@@ -135,6 +135,8 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     mapping(uint256 => address) public s_requests;
     // 映射 requestId -> 愿望文本
     mapping(uint256 => string) public s_wishTexts;
+    // 映射 requestId -> 请求时间戳（用于超时退款）
+    mapping(uint256 => uint256) public requestTimestamp;
 
     // --- 回购系统 (Buyback System) ---
     IPancakeRouter02 public swapRouter;
@@ -157,6 +159,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     event TopicSettled(bytes32 indexed topicId, uint8 outcome, uint256 totalPool);
     event WinningsClaimed(bytes32 indexed topicId, address indexed user, uint256 amount);
     event BuybackExecuted(uint256 bnbAmount, uint256 tokensReceived);
+    event RefundIssued(uint256 indexed requestId, address indexed user, uint256 amount);
 
     // --- Constructor (构造函数) ---
     constructor(
@@ -236,6 +239,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         
         s_requests[requestId] = msg.sender;
         s_wishTexts[requestId] = wishText;
+        requestTimestamp[requestId] = block.timestamp; // 记录时间戳用于超时退款
         
         emit SeekRequestSent(requestId, msg.sender);
     }
@@ -745,6 +749,30 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         require(amount <= wishPowerPool, "Insufficient balance");
         wishPowerPool -= amount;
         _executeSwapBuyback(amount);
+    }
+    
+    /**
+     * @notice VRF 超时退款机制
+     * @dev 如果 VRF 服务中断超过 1 小时，用户可申请退款
+     * @param requestId VRF 请求 ID
+     */
+    function refundStaleRequest(uint256 requestId) external {
+        require(s_requests[requestId] == msg.sender, "Not your request");
+        require(requestTimestamp[requestId] > 0, "Invalid request");
+        require(
+            block.timestamp - requestTimestamp[requestId] > 1 hours,
+            "Refund available after 1 hour"
+        );
+        
+        // 清理状态
+        delete s_requests[requestId];
+        delete s_wishTexts[requestId];
+        delete requestTimestamp[requestId];
+        
+        // 退款
+        payable(msg.sender).transfer(SEEK_COST);
+        
+        emit RefundIssued(requestId, msg.sender, SEEK_COST);
     }
     
     /**
