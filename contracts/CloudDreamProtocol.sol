@@ -74,8 +74,9 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     mapping(address => uint256) public karmaBalance;
     mapping(address => uint256) public resonanceCount;
     mapping(address => mapping(address => bool)) public hasResonatedWith;
-    mapping(address => uint256) public lastResonanceTime; // 防滥用：冷却时间
-    uint256 public constant MAX_RESONANCE_LIMIT = 10;
+    mapping(address => uint256) public dailyResonanceDate; // 记录日期（天数）
+    mapping(address => uint256) public dailyResonanceCount; // 当日使用次数
+    uint256 public constant DAILY_RESONANCE_LIMIT = 3; // 每日3次限制
     uint256 public constant KARMA_PER_LISTEN = 1;
     uint256 public constant KARMA_FOR_FREE_SEEK = 10;
 
@@ -320,19 +321,21 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     function respondToEcho(address referrer, string memory message) external {
         require(referrer != address(0), "Invalid Referrer");
         require(referrer != msg.sender, "Cannot refer self");
-        require(resonanceCount[msg.sender] < MAX_RESONANCE_LIMIT, "Max resonance reached (10)");
         require(!hasResonatedWith[msg.sender][referrer], "Already resonated with this user");
         
-        // 防滥用：冷却时间检查（1天）
-        require(
-            block.timestamp - lastResonanceTime[msg.sender] > 1 days,
-            "Cooldown active, please wait"
-        );
+        // 每日3次限制检查
+        uint256 today = block.timestamp / 1 days; // 当前日期（天数）
+        if (dailyResonanceDate[msg.sender] != today) {
+            // 新的一天，重置计数
+            dailyResonanceDate[msg.sender] = today;
+            dailyResonanceCount[msg.sender] = 0;
+        }
+        require(dailyResonanceCount[msg.sender] < DAILY_RESONANCE_LIMIT, "Daily limit reached (3)");
         
         // 记录绑定
         hasResonatedWith[msg.sender][referrer] = true;
         resonanceCount[msg.sender]++;
-        lastResonanceTime[msg.sender] = block.timestamp; // 更新冷却时间
+        dailyResonanceCount[msg.sender]++; // 增加当日计数
         
         // 发放奖励给邀请人
         karmaBalance[referrer] += KARMA_PER_LISTEN;
@@ -774,6 +777,20 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     
     function getUserParticipatedTopicIds(address user) external view returns (bytes32[] memory) {
         return userParticipatedTopicIds[user];
+    }
+    
+    /**
+     * @notice 查询用户今日剩余回响次数
+     * @param user 用户地址
+     * @return 剩余次数 (0-3)
+     */
+    function getRemainingResonanceToday(address user) external view returns (uint256) {
+        uint256 today = block.timestamp / 1 days;
+        if (dailyResonanceDate[user] != today) {
+            return DAILY_RESONANCE_LIMIT; // 新的一天，返回满额
+        }
+        uint256 used = dailyResonanceCount[user];
+        return used >= DAILY_RESONANCE_LIMIT ? 0 : DAILY_RESONANCE_LIMIT - used;
     }
     
     function getBatchWishes(uint256[] calldata ids) external view returns (WishRecord[] memory) {
