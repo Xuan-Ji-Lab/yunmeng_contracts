@@ -64,7 +64,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 用户数据
     mapping(address => uint256) public userTribulationCount;
     mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
-    uint256 public constant PITY_BASE_UNIT = 350 ether; // 每个权重单位对应的代币奖励 (350 WISH)
+    uint256 public constant PITY_BASE_UNIT = 60 ether; // 每个权重单位对应的代币奖励 (60 WISH) - 确保协议经济安全
     
     // 听澜与福报系统
     mapping(address => uint256) public karmaBalance;
