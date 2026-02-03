@@ -69,7 +69,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 用户数据
     mapping(address => uint256) public userTribulationCount;
     mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
-    uint256 public constant PITY_BASE_UNIT = 60 ether; // 每个权重单位对应的代币奖励 (60 WISH) - 确保协议经济安全
+    uint256 public constant PITY_BASE_UNIT = 0.0003 ether; // 每个权重单位对应的 BNB 奖励
     
     // 全服保底重置机制
     uint256 public lastAbyssTimestamp; // 上次归墟发生的时间戳
@@ -142,6 +142,9 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     mapping(uint256 => string) public s_wishTexts;
     // 映射 requestId -> 请求时间戳（用于超时退款）
     mapping(uint256 => uint256) public requestTimestamp;
+
+    // --- 权限管理 (Access Control) ---
+    mapping(address => bool) public authorizedTopicCreators;
 
     // --- 回购系统 (Buyback System) ---
     IPancakeRouter02 public swapRouter;
@@ -503,19 +506,16 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         userTribulationCount[user] = 0;
         userTribulationWeight[user] = 0;
 
-        // 简化逻辑：直接检查并发放
-        if (pityReward > 0 && wishToken != address(0)) {
-            require(wishTokenPool >= pityReward, "Insufficient pool for pity");
-            require(
-                IERC20Minimal(wishToken).balanceOf(address(this)) >= pityReward,
-                "Insufficient balance for pity"
-            );
+        // 简化逻辑：直接检查并发放 BNB
+        if (pityReward > 0) {
+            // 检查奖池余额
+            require(wishPowerPool >= pityReward, "Insufficient pool for pity");
             
-            wishTokenPool -= pityReward;
-            require(
-                IERC20Minimal(wishToken).transfer(user, pityReward),
-                "Pity transfer failed"
-            );
+            wishPowerPool -= pityReward;
+            
+            // 发放 BNB
+            (bool success, ) = payable(user).call{value: pityReward, gas: 2300}("");
+            require(success, "Pity transfer failed");
         }
         
         // 记录保底
@@ -533,7 +533,17 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     }
 
     /**
-     * @notice 管理员创建新的问天议题
+     * @notice 设置 Topic 创建权限
+     * @param creator 地址
+     * @param authorized 是否授权
+     */
+    function setTopicCreator(address creator, bool authorized) external onlyOwner {
+        authorizedTopicCreators[creator] = authorized;
+    }
+
+    /**
+     * @notice 创建新的问天议题
+     * @dev 仅限 Owner 或授权地址
      * @param _topicIdStr 字符串ID (例如 "btc_100k")
      * @param _duration 持续时间 (秒)
      * @param _title 显示标题
@@ -546,7 +556,11 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         string memory _title, 
         string memory _optionA, 
         string memory _optionB
-    ) external onlyOwner {
+    ) external {
+        require(
+            msg.sender == owner() || authorizedTopicCreators[msg.sender],
+            "Not authorized"
+        );
         bytes32 topicId = keccak256(abi.encodePacked(_topicIdStr));
         require(topics[topicId].endTime == 0, "Topic already exists"); // 议题已存在
         
