@@ -51,7 +51,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // --- State Variables (状态变量) ---
     
     // 基础费用
-    uint256 public constant SEEK_COST = 0.001 ether;
+    uint256 public constant SEEK_COST = 0.005 ether;
     uint256 public constant WATER_MONEY_RATE = 500; // 5% (基数 10000)
     
     // 概率阈值 (基数 1000)
@@ -69,7 +69,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 用户数据
     mapping(address => uint256) public userTribulationCount;
     mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
-    uint256 public constant PITY_BASE_UNIT = 0.0003 ether; // 每个权重单位对应的 BNB 奖励
+    uint256 public constant PITY_BASE_UNIT = 0.0015 ether; // 每个权重单位对应的 BNB 奖励
     
     // 全服保底重置机制
     uint256 public lastAbyssTimestamp; // 上次归墟发生的时间戳
@@ -200,30 +200,14 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
             uint256 toSwap = (msg.value * buybackPercent) / 10000;
             uint256 toTreasury = msg.value - toSwap;
             
-            // 执行回购或直接入池 (改为: 强制用 BNB 自动购买/Mint WISH)
-            /* 
+
+            // 执行回购 (70%)
             if (buybackEnabled && address(swapRouter) != address(0) && wishToken != address(0)) {
                 _executeSwapBuyback(toSwap);
-            } else { 
-            */
-                // --- Temporary Auto-Buy Logic (Active) ---
-                wishPowerPool += toSwap;
-                
-                // Mint to Pool (address(this)) instead of User
-                // The WISH tokens accumulate in the contract for future distribution
-                uint256 tokenAmount = toSwap * 1000000;
-                accumulatedWishSold += tokenAmount;
-                wishTokenPool += tokenAmount; // Fix: Update pool balance tracking
-
-                if (wishToken != address(0)) {
-                   // Mint to this contract
-                   try IWishToken(wishToken).protocolMint(address(this), tokenAmount) {} catch {}
-                }
-                // Emit event indicating pool accumulation
-                emit WishPowerPurchased(address(this), toSwap, tokenAmount);
-            // }
+            } 
             
-            payable(treasury).transfer(toTreasury);
+            // 剩余 30% (toTreasury) 保留在合约余额中，用于支付保底奖励和运营
+            // 取消自动转账: payable(treasury).transfer(toTreasury);
         } else {
             // --- 免费模式 (福报兑换) ---
             require(msg.value == 0, "Do not send partial BNB"); // 禁止部分支付
@@ -506,12 +490,11 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         userTribulationCount[user] = 0;
         userTribulationWeight[user] = 0;
 
-        // 简化逻辑：直接检查并发放 BNB
+        // 简化逻辑：直接检查并发放 BNB (从合约余额支出)
         if (pityReward > 0) {
-            // 检查奖池余额
-            require(wishPowerPool >= pityReward, "Insufficient pool for pity");
-            
-            wishPowerPool -= pityReward;
+            // 检查合约余额 (包含 30% 的运营留存)
+            require(address(this).balance >= pityReward, "Insufficient contract balance for pity");
+             // 注意:不再扣除 wishPowerPool，因为该变量现在仅用于追踪 fallback 资金
             
             // 发放 BNB
             (bool success, ) = payable(user).call{value: pityReward, gas: 2300}("");
@@ -794,6 +777,26 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         emit RefundIssued(requestId, msg.sender, SEEK_COST);
     }
     
+    /**
+     * @notice 管理员提取运营资金 (BNB)
+     * @dev 从 30% 留存中提取盈余
+     */
+    function withdrawOperationalFunds(uint256 amount) external onlyOwner {
+        require(amount <= address(this).balance, "Insufficient balance");
+        payable(treasury).transfer(amount);
+    }
+
+    /**
+     * @notice 管理员提取代币资产
+     * @dev 用于提取 WISH 税收奖励或其他误转入的代币
+     */
+    function withdrawGovernanceTokens(address token, uint256 amount) external onlyOwner {
+        require(token != address(0), "Invalid token");
+        // 如果是 WISH 代币，需要扣除 wishTokenPool 计数 (如果提取的是奖池资金)
+        // 但此处假设提取的是"额外的"税收，暂不强行关联 pool 逻辑，依靠管理员自行判断
+        IERC20Minimal(token).transfer(treasury, amount);
+    }
+
     /**
      * @notice 管理员注入愿力代币到奖池
      */
