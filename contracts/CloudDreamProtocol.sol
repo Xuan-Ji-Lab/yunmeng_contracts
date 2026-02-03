@@ -53,6 +53,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 基础费用
     uint256 public constant SEEK_COST = 0.005 ether;
     uint256 public constant WATER_MONEY_RATE = 500; // 5% (基数 10000)
+    uint256 public constant REFERRAL_THRESHOLD = 1; // 名帖门槛：至少付费寻真1次
     
     // 概率阈值 (基数 1000)
     uint16[4] public TIER_THRESHOLDS = [1, 11, 41, 141]; 
@@ -69,6 +70,7 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
     // 用户数据
     mapping(address => uint256) public userTribulationCount;
     mapping(address => uint256) public userTribulationWeight; // 累积劫数权重
+    mapping(address => uint256) public userTotalPaidSeeks; // 用户累计付费寻真次数 (终身有效，用于名帖门槛)
     uint256 public constant PITY_BASE_UNIT = 0.0015 ether; // 每个权重单位对应的 BNB 奖励
     
     // 全服保底重置机制
@@ -196,6 +198,8 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         // 逻辑分支: 付费 vs 免费
         if (msg.value >= SEEK_COST) {
             // --- 付费模式 ---
+            userTotalPaidSeeks[msg.sender]++; // 增加付费计数 (用于解锁名帖)
+
             // 1. 资金分配 (70% 回购, 30% 国库)
             uint256 toSwap = (msg.value * buybackPercent) / 10000;
             uint256 toTreasury = msg.value - toSwap;
@@ -328,6 +332,9 @@ contract CloudDreamProtocol is VRFConsumerBaseV2, ReentrancyGuard, Ownable {
         }
         require(dailyResonanceCount[msg.sender] < DAILY_RESONANCE_LIMIT, "Daily limit reached (3)");
         
+        // 防刷单检查：邀请人必须满足名帖门槛 (付费寻真 >= 1次)
+        require(userTotalPaidSeeks[referrer] >= REFERRAL_THRESHOLD, "Referrer invalid: Must have sought truth at least once");
+         
         // 记录绑定
         hasResonatedWith[msg.sender][referrer] = true;
         resonanceCount[msg.sender]++;
