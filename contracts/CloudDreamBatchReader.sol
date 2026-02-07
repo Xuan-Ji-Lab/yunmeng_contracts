@@ -27,10 +27,12 @@ contract CloudDreamBatchReader {
 
     // --- 核心合约接口 ---
     address public immutable core;
+    address public immutable oracle;
 
-    constructor(address _core) {
+    constructor(address _core, address _oracle) {
         require(_core != address(0), unicode"无效的 Core 地址");
         core = _core;
+        oracle = _oracle;
     }
 
     // === 批量查询函数 ===
@@ -195,6 +197,74 @@ contract CloudDreamBatchReader {
         }
         return result;
     }
+
+    // === Oracle 批量查询 ===
+
+    struct TopicBetRecord {
+        bytes32 topicId;
+        uint256[2] amounts; // [OptionA, OptionB]
+        bool claimed;
+    }
+
+    /// @notice 批量获取用户在特定议题的下注情况
+    function getUserTopicBets(address user, bytes32[] calldata topicIds) external view returns (TopicBetRecord[] memory) {
+        uint256 len = topicIds.length;
+        TopicBetRecord[] memory result = new TopicBetRecord[](len);
+        
+        for (uint256 i = 0; i < len; i++) {
+            bytes32 tid = topicIds[i];
+            
+            // 下注金额
+            uint256 amtA = IOracle(oracle).userBets(tid, user, 0);
+            uint256 amtB = IOracle(oracle).userBets(tid, user, 1);
+            
+            // 领奖状态 (注意：userBets 返回的是 mapping 值，hasClaimed 也是)
+            // 这里需要 IOracle 接口暴露 correct function
+            bool clm = IOracle(oracle).hasClaimed(tid, user);
+            
+            result[i] = TopicBetRecord({
+                topicId: tid,
+                amounts: [amtA, amtB],
+                claimed: clm
+            });
+        }
+        return result;
+    }
+
+    struct TopicBetDetail {
+        address user;
+        uint256 amountA;
+        uint256 amountB;
+        bool claimed;
+    }
+
+    /// @notice 获取某个议题的所有下注详情
+    function getTopicBetsDetails(bytes32 topicId) external view returns (TopicBetDetail[] memory) {
+        address[] memory users = IOracle(oracle).getTopicParticipants(topicId);
+        uint256 len = users.length;
+        TopicBetDetail[] memory result = new TopicBetDetail[](len);
+
+        for (uint256 i = 0; i < len; i++) {
+            address u = users[i];
+            uint256 amtA = IOracle(oracle).userBets(topicId, u, 0);
+            uint256 amtB = IOracle(oracle).userBets(topicId, u, 1);
+            bool clm = IOracle(oracle).hasClaimed(topicId, u);
+
+            result[i] = TopicBetDetail({
+                user: u,
+                amountA: amtA,
+                amountB: amtB,
+                claimed: clm
+            });
+        }
+        return result;
+    }
+}
+
+interface IOracle {
+    function userBets(bytes32 topicId, address user, uint256 option) external view returns (uint256);
+    function hasClaimed(bytes32 topicId, address user) external view returns (bool);
+    function getTopicParticipants(bytes32 topicId) external view returns (address[] memory);
 }
 
 // --- 核心合约接口 ---

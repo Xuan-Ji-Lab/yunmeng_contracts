@@ -20,6 +20,8 @@ contract DreamOracle is Ownable, ReentrancyGuard {
     bytes32[] public allTopicIds; // 存储所有议题ID，便于前端遍历
     mapping(bytes32 => mapping(address => uint256[2])) public userBets; // 用户下注记录
     mapping(bytes32 => mapping(address => bool)) public hasClaimed; // 领奖记录
+    mapping(address => bytes32[]) public userParticipatedTopics; // 用户参与的议题列表
+    mapping(bytes32 => address[]) public topicParticipants; // 议题参与者列表
     
     address public treasury; // 接收手续费地址(通常为 Core 或 Treasury)
     uint256 public constant FEE_RATE = 500; // 5% 手续费
@@ -62,6 +64,18 @@ contract DreamOracle is Ownable, ReentrancyGuard {
         return allTopicIds.length;
     }
 
+    function getUserTopicCount(address user) external view returns (uint256) {
+        return userParticipatedTopics[user].length;
+    }
+
+    function getUserTopicIds(address user) external view returns (bytes32[] memory) {
+        return userParticipatedTopics[user];
+    }
+
+    function getTopicParticipants(bytes32 topicId) external view returns (address[] memory) {
+        return topicParticipants[topicId];
+    }
+
     function settleTopic(bytes32 topicId, uint8 outcome) external onlyOwner {
         require(outcome < 2, unicode"无效结果");
         topics[topicId].settled = true;
@@ -74,6 +88,8 @@ contract DreamOracle is Ownable, ReentrancyGuard {
         Topic storage t = topics[topicId];
         require(block.timestamp < t.endTime, unicode"投注已截止");
         require(option < 2, unicode"无效选项");
+        // Limit: One person can only bet once per topic (and thus one option)
+        require(userBets[topicId][msg.sender][0] == 0 && userBets[topicId][msg.sender][1] == 0, unicode"已参与");
         
         uint256 fee = (msg.value * FEE_RATE) / 10000;
         uint256 stake = msg.value - fee;
@@ -84,6 +100,13 @@ contract DreamOracle is Ownable, ReentrancyGuard {
 
         t.totalPool += stake;
         t.optionPools[option] += stake;
+
+        // 如果是首次下注，添加到用户列表 和 议题参与者列表
+        if (userBets[topicId][msg.sender][0] == 0 && userBets[topicId][msg.sender][1] == 0) {
+            userParticipatedTopics[msg.sender].push(topicId);
+            topicParticipants[topicId].push(msg.sender);
+        }
+
         userBets[topicId][msg.sender][option] += stake;
 
         emit BetPlaced(topicId, msg.sender, option, stake);

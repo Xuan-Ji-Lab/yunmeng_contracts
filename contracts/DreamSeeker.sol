@@ -49,7 +49,13 @@ contract DreamSeeker is VRFConsumerBaseV2, Ownable, ReentrancyGuard {
 
     // 事件
     event SeekRequestSent(uint256 indexed requestId, address indexed user);
+    // Abyss Game State
+    uint256 public totalAbyssHolders;
+    uint256 public totalAbyssTribulations;
+    mapping(address => bool) public isAbyssHolder;
+    
     event SeekResult(address indexed user, uint8 tier, uint256 reward, string wishText);
+    event AbyssTriggered(address indexed user, bool isGrandFinale, uint256 tribulationCount);
     event PityTriggered(address indexed user, uint256 amount); // 天道回响事件
 
     constructor(
@@ -143,10 +149,32 @@ contract DreamSeeker is VRFConsumerBaseV2, Ownable, ReentrancyGuard {
         // 判定结果与劫数逻辑
         if (rng < TIER_THRESHOLDS[0]) {
             tier = 0; // 归墟 (Abyss)
-            // 归墟出现，劫数和权重全部重置
+            // 归墟出现，用户劫数清零
             tribCount = 0;
             userTribulationWeight[user] = 0;
-            // 触发大保底/奖励逻辑 (此处简化，复杂分红逻辑由 Core/Treasury 配合触发)
+            
+            // --- 归墟游戏逻辑 ---
+            bool isNew = false;
+            if (!isAbyssHolder[user]) {
+                isAbyssHolder[user] = true;
+                totalAbyssHolders++;
+                isNew = true;
+            }
+            
+            bool isGrandFinale = (totalAbyssTribulations + 1 >= 81);
+            if (isGrandFinale) {
+                totalAbyssTribulations = 81; // 达到终局状态
+            } else {
+                totalAbyssTribulations++;
+            }
+            emit AbyssTriggered(user, isGrandFinale, totalAbyssTribulations);
+
+            // 模块化归墟处理 (Treasury 负责资金)
+            if (address(treasury) != address(0)) {
+                try treasury.handleAbyssWin(user, isGrandFinale, isNew) returns (uint256 r) {
+                    reward = r;
+                } catch {}
+            }
         } else {
             // 非归墟，劫数+1
             tribCount++;
@@ -213,9 +241,32 @@ contract DreamSeeker is VRFConsumerBaseV2, Ownable, ReentrancyGuard {
         uint8 tier = 0; // 归墟
         uint256 reward = 0;
         
-        // 重置劫数和权重
+        // 重置用户劫数
         core.setTribulationCount(user, 0);
         userTribulationWeight[user] = 0;
+        
+        // --- 归墟游戏逻辑 ---
+        bool isNew = false;
+        if (!isAbyssHolder[user]) {
+            isAbyssHolder[user] = true;
+            totalAbyssHolders++;
+            isNew = true;
+        }
+        
+        bool isGrandFinale = (totalAbyssTribulations + 1 >= 81);
+        if (isGrandFinale) {
+            totalAbyssTribulations = 81;
+        } else {
+            totalAbyssTribulations++;
+        }
+        emit AbyssTriggered(user, isGrandFinale, totalAbyssTribulations);
+        
+        // 模块化归墟处理
+        if (address(treasury) != address(0)) {
+            try treasury.handleAbyssWin(user, isGrandFinale, isNew) returns (uint256 r) {
+                reward = r;
+            } catch {}
+        }
         
         // 记录到 Core
         core.addWishRecord(user, wishText, 0, tier, reward);
