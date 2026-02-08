@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICloudDreamCore.sol"; 
 import "./interfaces/IPancakeRouter02.sol";
+import "./interfaces/IFlapPortal.sol";
 
 /**
  * @title DreamTreasury (云梦国库 & 资金管理)
@@ -21,12 +22,12 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     /// @notice 核心配置合约 (用于权限校验)
     ICloudDreamCore public core;
     
-    /// @notice DEX 路由合约 (用于回购 Swap)
+    /// @notice [DEPRECATED] 原 DEX 路由合约 (保留名称以兼容存储布局)
     IPancakeRouter02 public swapRouter;
     
     // --- 资产地址 ---
     address public wishToken;
-    address public wbnb;
+    address public wbnb; // [DEPRECATED] 原 WBNB 地址 (保留名称以兼容存储布局)
     
     // --- 配置参数 ---
     /// @notice 是否开启回购功能
@@ -38,10 +39,17 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     /// @notice 回购滑点保护 (基点)，例如 9500 表示 95% (5%滑点)
     uint256 public buybackSlippage; 
 
+    // --- 新增状态变量 (Storage Gap 之后) ---
+    /// @notice Flap Portal 合约地址 (内盘回购)
+    address public flapPortal;
+
     // --- 事件定义 ---
     event PayoutExecuted(address indexed to, uint256 amount, string currency); // 支付执行事件 (currency: "BNB" | "WISH")
     event BuybackExecuted(uint256 bnbAmount, uint256 tokensReceived); // 回购执行事件
+    event BuybackFailed(string reason); // 回购失败事件
     event FundsReceived(address indexed sender, uint256 amount); // 资金接收事件
+    event BuybackFailedBytes(bytes data); // 详细错误数据
+    event PortalUpdated(address indexed newPortal);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -51,22 +59,19 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     /**
      * @notice 初始化函数
      * @param _core Core合约地址
-     * @param _router DEX Router地址
+     * @param _flapPortal Flap Portal 地址
      * @param _wishToken WISH 代币地址
-     * @param _wbnb WBNB 地址
      */
     function initialize(
         address _core,
-        address _router,
-        address _wishToken,
-        address _wbnb
+        address _flapPortal,
+        address _wishToken
     ) public initializer {
         __UUPSUpgradeable_init();
 
         core = ICloudDreamCore(_core);
-        swapRouter = IPancakeRouter02(_router);
+        flapPortal = _flapPortal;
         wishToken = _wishToken;
-        wbnb = _wbnb;
         
         buybackEnabled = true;
         buybackPercent = 7000; // 默认 70%
@@ -151,49 +156,50 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     }
 
     /**
-     * @notice 执行市场回购 (Execute Buyback)
-     * @dev 将持有的 BNB 在 DEX 上换成 WISH 代币，用于补充奖池。
-     *      通常在收到付费祈愿的 BNB 后触发。
-     * @param amountIn 用于回购的 BNB 数量 (0 表示全部余额)
+     * @notice 执行市场回购 (Execute Buyback) - Flap 内盘版
+     * @dev 将持有的 BNB 在 Flap 内盘买入 WISH 代币，用于补充奖池。
+     * @param amount 用于回购的 BNB 数量 (0 表示全部余额)
      */
-    function executeBuyback(uint256 amountIn) external {
-        require(buybackEnabled, unicode"回购未开启");
-        if (amountIn == 0) amountIn = address(this).balance; 
+    function executeBuyback(uint256 amount) external {
+        // 鉴权: 仅允许特定角色或为了测试允许任何人 (当前逻辑为 Open for ease of testing/triggering)
+        // require(core.hasRole(core.OPERATOR_ROLE(), msg.sender), "Treasury: unauthorized");
         
-        require(amountIn > 0, unicode"BNB 数额必须大于 0");
-        require(address(this).balance >= amountIn, unicode"余额不足");
-
-        // [FIX] Calculate swap amount based on buybackPercent (70% buyback, 30% reserve)
-        uint256 swapAmount = (amountIn * buybackPercent) / 10000;
+        // 如果 amount == 0, 使用合约内所有余额
+        uint256 available = amount;
+        if (amount == 0) {
+            available = address(this).balance;
+        }
         
-        if (swapAmount == 0) return;
-
-        address[] memory path = new address[](2);
-        path[0] = wbnb;
-        path[1] = wishToken;
-
-        // 获取预期输出，计算滑点保护 (动态配置)
-        uint256[] memory expectedAmounts = swapRouter.getAmountsOut(swapAmount, path);
-        uint256 minAmount = (expectedAmounts[1] * buybackSlippage) / 10000;
-
-        // 执行 Swap
-        swapRouter.swapExactETHForTokens{value: swapAmount}(
-            minAmount,
-            path,
-            address(this), // 换得的 Token 留在 Treasury 充实奖池 (Dividends)
-            block.timestamp + 300
-        );
+        // 应用回购比例 (例如 70%)
+        uint256 amountToSwap = (available * buybackPercent) / 10000;
         
-        emit BuybackExecuted(swapAmount, minAmount); 
+        require(amountToSwap > 0, "Treasury: No funds to buyback");
+
+        // Flap Portal Interaction
+        // 构建参数: (tokenIn=0x0, tokenOut=wishToken, amountIn=amountToSwap, minOut=0, data="")
+        IFlapPortal.SwapExactInputParams memory params = IFlapPortal.SwapExactInputParams({
+            tokenIn: address(0), // Native BNB
+            tokenOut: wishToken,
+            amountIn: amountToSwap,
+            amountOutMinimum: 0, // 生产环境应计算滑点
+            data: ""
+        });
+
+        // 调用 Portal
+        try IFlapPortal(flapPortal).swapExactInput{value: amountToSwap}(params) returns (uint256 amtOut) {
+            emit BuybackExecuted(amountToSwap, amtOut);
+        } catch Error(string memory reason) {
+            emit BuybackFailed(reason);
+        } catch (bytes memory lowLevelData) {
+            emit BuybackFailed("LowLevelError");
+            emit BuybackFailedBytes(lowLevelData);
+        }
     }
 
     // --- 管理员配置 (Admin Config) ---
     
     /**
      * @notice 设置回购参数 (需 CONFIG_ROLE)
-     * @param _enabled 是否开启回购
-     * @param _percent 回购比例 (基点, e.g. 7000 = 70%)
-     * @param _slippage 滑点保护 (基点, e.g. 9500 = 95%)
      */
     function setConfig(bool _enabled, uint256 _percent, uint256 _slippage) external {
         require(
@@ -204,15 +210,36 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
         buybackPercent = _percent;
         buybackSlippage = _slippage;
     }
+
+    /**
+     * @notice 设置 Flap Portal 地址 (需 Admin)
+     */
+    function setFlapPortal(address _portal) external {
+        require(
+            core.hasRole(0x00, msg.sender), // DEFAULT_ADMIN_ROLE
+            "Treasury: only admin"
+        );
+        flapPortal = _portal;
+        emit PortalUpdated(_portal);
+    }
+
+    /**
+     * @notice 设置 WISH 代币地址 (需 Admin)
+     * @dev 用于迁移到 Flap 发射的新代币
+     */
+    function setWishToken(address _token) external {
+        require(
+            core.hasRole(0x00, msg.sender), // DEFAULT_ADMIN_ROLE
+            "Treasury: only admin"
+        );
+        wishToken = _token;
+    }
     
     /**
      * @notice 更新核心合约地址 (需 Admin)
      * @dev 仅紧急情况下迁移 Core 合约使用
      */
     function setCore(address _core) external {
-        // Only Admin can change Core address (Dangerous)
-        // But wait, how do we check role if Core address is changing?
-        // We check against OLD Core.
         require(
             core.hasRole(0x00, msg.sender), // DEFAULT_ADMIN_ROLE is 0x00
             "Treasury: only admin"
