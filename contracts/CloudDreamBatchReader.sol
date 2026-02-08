@@ -7,7 +7,7 @@ pragma solidity ^0.8.20;
  * @dev 只读合约，不修改任何状态，零风险升级
  */
 contract CloudDreamBatchReader {
-    // --- 数据结构 (与 Core 保持一致) ---
+    // --- 数据结构 (与 Seeker 保持一致) ---
     struct WishRecord {
         uint256 id;
         address user;
@@ -26,12 +26,12 @@ contract CloudDreamBatchReader {
     }
 
     // --- 核心合约接口 ---
-    address public immutable core;
+    address public immutable seeker;
     address public immutable oracle;
 
-    constructor(address _core, address _oracle) {
-        require(_core != address(0), unicode"无效的 Core 地址");
-        core = _core;
+    constructor(address _seeker, address _oracle) {
+        require(_seeker != address(0), unicode"无效的 Seeker 地址");
+        seeker = _seeker;
         oracle = _oracle;
     }
 
@@ -39,26 +39,42 @@ contract CloudDreamBatchReader {
 
     /// @notice 获取用户祈愿记录数量
     function getUserWishCount(address user) external view returns (uint256) {
-        // 通过遍历来获取数量（因为原合约没有 count 函数）
-        uint256 count = 0;
-        while (true) {
-            try ICore(core).userWishIds(user, count) returns (uint256) {
-                count++;
-            } catch {
-                break;
+        // 通过遍历来获取数量（因为原合约没有 count 函数，或者只有 getUserWishCount view）
+        // DreamSeeker 有 getUserWishCount 试图函数吗？
+        // 检查 ISeeker 接口定义。如果有 getUserWishCount 则直接调用。
+        // 如果没有，则使用 try-catch 遍历。
+        // DreamSeeker (Proxy) 代码中有 getUserWishCount。
+        try ISeeker(seeker).getUserWishCount(user) returns (uint256 count) {
+            return count;
+        } catch {
+            // Fallback: 遍历
+            uint256 count = 0;
+            while (true) {
+                try ISeeker(seeker).userWishIds(user, count) returns (uint256) {
+                    count++;
+                } catch {
+                    break;
+                }
+                if (count > 10000) break; // 安全限制
             }
-            if (count > 10000) break; // 安全限制
+            return count;
         }
-        return count;
     }
 
     /// @notice 批量获取用户祈愿 ID（分页）
     function getUserWishIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
+        // 如果 Seeker 提供了 batch getter，优先使用
+        try ISeeker(seeker).getUserWishIdsBatch(user, start, count) returns (uint256[] memory ids) {
+            return ids;
+        } catch {
+           // Fallback
+        }
+
         uint256[] memory result = new uint256[](count);
         uint256 fetched = 0;
         
         for (uint256 i = 0; i < count; i++) {
-            try ICore(core).userWishIds(user, start + i) returns (uint256 id) {
+            try ISeeker(seeker).userWishIds(user, start + i) returns (uint256 id) {
                 result[fetched] = id;
                 fetched++;
             } catch {
@@ -79,13 +95,13 @@ contract CloudDreamBatchReader {
 
     /// @notice 获取用户天道回响记录数量
     function getUserPityCount(address user) external view returns (uint256) {
-        uint256[] memory ids = ICore(core).getUserPityIds(user);
+        uint256[] memory ids = ISeeker(seeker).getUserPityIds(user);
         return ids.length;
     }
 
     /// @notice 批量获取用户天道回响 ID（分页）
     function getUserPityIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
-        uint256[] memory allIds = ICore(core).getUserPityIds(user);
+        uint256[] memory allIds = ISeeker(seeker).getUserPityIds(user);
         uint256 total = allIds.length;
         
         if (start >= total) {
@@ -107,6 +123,13 @@ contract CloudDreamBatchReader {
 
     /// @notice 批量获取祈愿记录详情
     function getWishRecordsBatch(uint256[] calldata ids) external view returns (WishRecord[] memory) {
+        // 如果 Seeker 提供了 batch getter
+        try ISeeker(seeker).getWishRecordsBatch(ids) returns (WishRecord[] memory records) {
+            return records;
+        } catch {
+            // Fallback
+        }
+
         uint256 len = ids.length;
         WishRecord[] memory result = new WishRecord[](len);
         
@@ -119,7 +142,7 @@ contract CloudDreamBatchReader {
                 uint256 round,
                 uint8 tier,
                 uint256 reward
-            ) = ICore(core).allWishes(ids[i]);
+            ) = ISeeker(seeker).allWishes(ids[i]);
             
             result[i] = WishRecord({
                 id: id,
@@ -145,7 +168,7 @@ contract CloudDreamBatchReader {
                 address user,
                 uint256 amount,
                 uint256 timestamp
-            ) = ICore(core).allPityRecords(ids[i]);
+            ) = ISeeker(seeker).allPityRecords(ids[i]);
             
             result[i] = PityRecord({
                 id: id,
@@ -160,42 +183,18 @@ contract CloudDreamBatchReader {
     /// @notice 一次性获取用户所有祈愿数据（适合数量较少时）
     function getUserWishRecordsAll(address user, uint256 maxCount) external view returns (WishRecord[] memory) {
         // 先获取 ID 列表
-        uint256[] memory ids = new uint256[](maxCount);
-        uint256 count = 0;
-        
-        for (uint256 i = 0; i < maxCount; i++) {
-            try ICore(core).userWishIds(user, i) returns (uint256 id) {
-                ids[count] = id;
-                count++;
-            } catch {
-                break;
-            }
+        uint256[] memory ids;
+        try ISeeker(seeker).getUserWishIdsBatch(user, 0, maxCount) returns (uint256[] memory _ids) {
+            ids = _ids;
+        } catch {
+             // Fallback ID fetch if batch not available
+             // ... simplify for readability, assume Seeker has standard access or we use the loop method above
+             ids = this.getUserWishIdsBatch(user, 0, maxCount); // external call to self? inefficient but works for view
         }
         
         // 获取详情
-        WishRecord[] memory result = new WishRecord[](count);
-        for (uint256 i = 0; i < count; i++) {
-            (
-                uint256 id,
-                address u,
-                string memory wishText,
-                uint256 timestamp,
-                uint256 round,
-                uint8 tier,
-                uint256 reward
-            ) = ICore(core).allWishes(ids[i]);
-            
-            result[i] = WishRecord({
-                id: id,
-                user: u,
-                wishText: wishText,
-                timestamp: timestamp,
-                round: round,
-                tier: tier,
-                reward: reward
-            });
-        }
-        return result;
+        // Use batch getter if available?
+        return this.getWishRecordsBatch(ids);
     }
 
     // === Oracle 批量查询 ===
@@ -218,8 +217,7 @@ contract CloudDreamBatchReader {
             uint256 amtA = IOracle(oracle).userBets(tid, user, 0);
             uint256 amtB = IOracle(oracle).userBets(tid, user, 1);
             
-            // 领奖状态 (注意：userBets 返回的是 mapping 值，hasClaimed 也是)
-            // 这里需要 IOracle 接口暴露 correct function
+            // 领奖状态
             bool clm = IOracle(oracle).hasClaimed(tid, user);
             
             result[i] = TopicBetRecord({
@@ -267,10 +265,14 @@ interface IOracle {
     function getTopicParticipants(bytes32 topicId) external view returns (address[] memory);
 }
 
-// --- 核心合约接口 ---
-interface ICore {
+// --- 核心合约接口 (Seeker) ---
+interface ISeeker {
     function userWishIds(address user, uint256 index) external view returns (uint256);
+    function getUserWishCount(address user) external view returns (uint256);
+    function getUserWishIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory);
+    
     function getUserPityIds(address user) external view returns (uint256[] memory);
+    
     function allWishes(uint256 id) external view returns (
         uint256 id_,
         address user,
@@ -280,6 +282,8 @@ interface ICore {
         uint8 tier,
         uint256 reward
     );
+    function getWishRecordsBatch(uint256[] calldata ids) external view returns (CloudDreamBatchReader.WishRecord[] memory);
+    
     function allPityRecords(uint256 id) external view returns (
         uint256 id_,
         address user,
@@ -287,3 +291,4 @@ interface ICore {
         uint256 timestamp
     );
 }
+

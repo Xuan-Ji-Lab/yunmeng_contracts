@@ -1,0 +1,4766 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xFf1cE487BCDC2fB806D364AaBd007EdDe8b576cc",
+      "txHash": "0x9ea4d0c561b473ce8ff4352fc6555c7e0801489cb4f06876042feba2808f9933",
+      "kind": "uups"
+    },
+    {
+      "address": "0x0A5D890c8e9949e7571C82420428447fcdFd8925",
+      "txHash": "0xf1452dd10ab0c31f98d7eee8ace3c674416c716e09613ffda60fbdf0c664da78",
+      "kind": "uups"
+    },
+    {
+      "address": "0xC6f47b974FE40F47c49f1C52316f769449567b00",
+      "txHash": "0x8cb25ca185a3e3448a4bb09c960c7c09a30c04b121273027d63462ec093f506e",
+      "kind": "uups"
+    },
+    {
+      "address": "0x3d8D9BE23aa24c4C2851e346e8c107cA23dd117A",
+      "txHash": "0x80cdcc0b5314335eda677805cd07374c881b7bbed88b1c5b05f45146ad6f8122",
+      "kind": "uups"
+    },
+    {
+      "address": "0x079d0381A6a87a03763B1da68370076Df84bAE8B",
+      "txHash": "0x8ef87e7f5a2812f653e013935fe47768c40e66559840faef1d857e6c0c7462fd",
+      "kind": "uups"
+    },
+    {
+      "address": "0xCa355a731f3455d353E49999223B40702847d75E",
+      "txHash": "0x4b75334bd196ea24bf96481abbe65f1101e195796f36d31078bbe4b815859537",
+      "kind": "uups"
+    },
+    {
+      "address": "0x0f077cC66bCe6963815Bb431edD1E900934ae796",
+      "txHash": "0x5f61eb585157cefec06c3f2977e31df3a728bb9a8dc4c46413cacd4028d0edaa",
+      "kind": "uups"
+    },
+    {
+      "address": "0x2aCb433E2fCe3dBB465c43De6A67c9c0Bf538FAA",
+      "txHash": "0x3477d77331a641968811dd6c8b1f7fc5c3b1447e280c9af1b5bcd53a0ef28c95",
+      "kind": "uups"
+    },
+    {
+      "address": "0x83cD99dF938624Fc2021Ac85438d565472076910",
+      "txHash": "0xc4dc6b4fc8f9c66667a0f1df95009d64e0adc4fcc36442be333a95797468031c",
+      "kind": "uups"
+    },
+    {
+      "address": "0x60e41a3Da11A08BDe5f3da210143357B410CE1c5",
+      "txHash": "0xbcfcd0f782fa4becfef973c64ec47c33a1a4da859054a2ee83413db2a6b57b26",
+      "kind": "uups"
+    },
+    {
+      "address": "0x2792a903CDa6f76faf8E6fc55f247b92c3e7c209",
+      "txHash": "0x3098258f122cdd391718b7a71f7f3451dd8a5195945869e8f5cecf4de2769fe9",
+      "kind": "uups"
+    },
+    {
+      "address": "0xB66Ee0691F37108df8C73D777658EbD589dC320F",
+      "txHash": "0xb72ec6329e7349b038b71e70eb6b31760e50afd474c67defcc6a7a605148a5bd",
+      "kind": "uups"
+    },
+    {
+      "address": "0xf261e933e404427c81fb4e8D936772b113BC03Ea",
+      "txHash": "0xd55055af1662628a04c7a2b6b97c62e4555cecbe22409feb9d26ca37e7fbe59a",
+      "kind": "uups"
+    },
+    {
+      "address": "0xCC2DEbD11AAc3522Be1EE6514884eb5D41FD51d4",
+      "txHash": "0xf92f971cc81be58dac3edf55272a98c09a45983744ef4e50c2106eb3e0bcc9c3",
+      "kind": "uups"
+    },
+    {
+      "address": "0xC9e36c5C1678B0205C6cD8D22e60216dd1374426",
+      "txHash": "0x5b5eee8aac0e47343c169149c3b5c9c96a671dc8b19f97fe7028af5ffa43476a",
+      "kind": "uups"
+    },
+    {
+      "address": "0xAA0930e9AB7b0580b4e7F6A7082FFa101Ca62a14",
+      "txHash": "0xfa9f2516aa8a925da888f70623ff4c1790bb77160b02166fe7fa3d45159aa70d",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "6fa02e5d2cf23b43ef482fd9fc7a7c81d382fd2b53890ab9624a7a65da3b125f": {
+      "address": "0x7748D40B77D967573214f590Bb64A12A2D96eF0C",
+      "txHash": "0x075a90edce0792fbb7dac13836f4d7d23c539169b82a8c784f1db2038467d43b",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "protocolFeeRate",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:46"
+          },
+          {
+            "label": "protocolFeeRecipient",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:51"
+          },
+          {
+            "label": "vrfKeyHash",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_bytes32",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:57"
+          },
+          {
+            "label": "vrfSubscriptionId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint64",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:60"
+          },
+          {
+            "label": "vrfCallbackGasLimit",
+            "offset": 8,
+            "slot": "3",
+            "type": "t_uint32",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:64"
+          },
+          {
+            "label": "vrfRequestConfirmations",
+            "offset": 12,
+            "slot": "3",
+            "type": "t_uint16",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:65"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:68"
+          },
+          {
+            "label": "seeker",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_address",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:70"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_address",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:75"
+          },
+          {
+            "label": "oracle",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_address",
+            "contract": "CloudDreamCore",
+            "src": "contracts/CloudDreamCore.sol:77"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(RoleData)113_storage)": {
+            "label": "mapping(bytes32 => struct AccessControlUpgradeable.RoleData)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessControlStorage)123_storage": {
+            "label": "struct AccessControlUpgradeable.AccessControlStorage",
+            "members": [
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_bytes32,t_struct(RoleData)113_storage)",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)300_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(RoleData)113_storage": {
+            "label": "struct AccessControlUpgradeable.RoleData",
+            "members": [
+              {
+                "label": "hasRole",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminRole",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessControl": [
+            {
+              "contract": "AccessControlUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)113_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol:62",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "ac9da69fa04e1080f842169deb49b2854ec43a0e698689dfbe1082ca04d4f1cc": {
+      "address": "0xbCD6077DA29CaC01a8951Fdbf9547Ba6956B5108",
+      "txHash": "0x8a9ce05bd45466b8d3834385deaea94b97b5d4a3c93bd7f6d99297f5ef0a1d17",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)5217",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:34"
+          },
+          {
+            "label": "swapRouter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IPancakeRouter02)5353",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:37"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:40"
+          },
+          {
+            "label": "wbnb",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:40"
+          },
+          {
+            "label": "buybackEnabled",
+            "offset": 20,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:41"
+          },
+          {
+            "label": "buybackPercent",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:44"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)300_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)240_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_contract(ICloudDreamCore)5217": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPancakeRouter02)5353": {
+            "label": "contract IPancakeRouter02",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "c1a6058d7946bdbd1c3dd282585e8ecd7d7520e595dfae6f46da6c62b32616de": {
+      "address": "0x313681E8E5425F002853Be2Dc240A3c76CBc5f70",
+      "txHash": "0x82bfd23d1d13be08616f59ad0134e7842de3b602aa5e1c9c793ebcf4a9307247",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)5217",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:34"
+          },
+          {
+            "label": "seeker",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:35"
+          },
+          {
+            "label": "resonanceCount",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:38"
+          },
+          {
+            "label": "hasResonatedWith",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:43"
+          },
+          {
+            "label": "dailyResonanceDate",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:49"
+          },
+          {
+            "label": "dailyResonanceCount",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:52"
+          },
+          {
+            "label": "karmaBalance",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:59"
+          },
+          {
+            "label": "allResonances",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_array(t_struct(ResonanceRecord)2565_storage)dyn_storage",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:69"
+          },
+          {
+            "label": "userOutboundResonances",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:70"
+          },
+          {
+            "label": "userInboundResonances",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:72"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)300_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)240_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(ResonanceRecord)2565_storage)dyn_storage": {
+            "label": "struct DreamDrifter.ResonanceRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)5217": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(ResonanceRecord)2565_storage": {
+            "label": "struct DreamDrifter.ResonanceRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "source",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "message",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "3a0467d73a2b28d47d02636b36e43379b5e86ca3f2c18800ec46c3e37c38f303": {
+      "address": "0x8de746E70567898E60CafB7B748Cc4bABB6B0D79",
+      "txHash": "0xb440c7fd2c51389323524f4bd4634f087a845906a3744fdf3cfa3627b522ddda",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(IDreamTreasury)5263",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:35"
+          },
+          {
+            "label": "topics",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_struct(Topic)2923_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:53"
+          },
+          {
+            "label": "allTopicIds",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:56"
+          },
+          {
+            "label": "userBets",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:59"
+          },
+          {
+            "label": "hasClaimed",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:62"
+          },
+          {
+            "label": "userParticipatedTopics",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_array(t_bytes32)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:66"
+          },
+          {
+            "label": "topicParticipants",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_bytes32,t_array(t_address)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:67"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)300_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)240_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)453_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_string_storage)2_storage": {
+            "label": "string[2]",
+            "numberOfBytes": "64"
+          },
+          "t_array(t_uint256)2_storage": {
+            "label": "uint256[2]",
+            "numberOfBytes": "64"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IDreamTreasury)5263": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_bytes32)dyn_storage)": {
+            "label": "mapping(address => bytes32[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_uint256)2_storage)": {
+            "label": "mapping(address => uint256[2])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_array(t_address)dyn_storage)": {
+            "label": "mapping(bytes32 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))": {
+            "label": "mapping(bytes32 => mapping(address => uint256[2]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Topic)2923_storage)": {
+            "label": "mapping(bytes32 => struct DreamOracle.Topic)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Topic)2923_storage": {
+            "label": "struct DreamOracle.Topic",
+            "members": [
+              {
+                "label": "totalPool",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "optionPools",
+                "type": "t_array(t_uint256)2_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "settled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "outcome",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "3"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "title",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "optionLabels",
+                "type": "t_array(t_string_storage)2_storage",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "a0c28751e27c7ae885d415395a8880b73b63b7c9ec4c3b5b0a426b2e8ea80472": {
+      "address": "0x06e11cbC18c3f823E3FA81c409036a69182B124F",
+      "txHash": "0x26011398c152bc3c389cd65cc1972003bf421d0f7f82f8e34b9aa1b3419207af",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)5217",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)5263",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)5241",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:67"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:72"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:78"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:85"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:91"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:97"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:100"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_struct(WishRecord)3571_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:119"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(PityRecord)3580_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:121"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:122"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:123"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)3613_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:128"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "TIER_THRESHOLDS",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:139"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)300_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)240_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)453_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(PityRecord)3580_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)3571_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)5217": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)5241": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)5263": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)3613_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)3580_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)3613_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)3571_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "d9594f96ed737a9273cf37e4667a00ae18fdae3ab88e62cfe77a9d382fd892de": {
+      "address": "0xf8b73Df184Af64A991C027B5E294B9Ba8ECa822d",
+      "txHash": "0xe1a1f3e3d2b91bc91693d6c4233829f4b6b8327713603c2319949984679c81c5",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)3021",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)3067",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)3045",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:67"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:72"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:78"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:85"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:91"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:97"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:100"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_struct(WishRecord)1818_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:119"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(PityRecord)1827_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:121"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:122"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:123"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:128"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "TIER_THRESHOLDS",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:139"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)160_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)100_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)313_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(PityRecord)1827_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)1818_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)3021": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)3045": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)3067": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)1827_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)1860_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)1818_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "1253c20d6365e9bb9e6335d62866997218619c470ab0d10f1995cefd3d5b7011": {
+      "address": "0x967F3AA0eb50fc20B80E7B15933dF9408553654e",
+      "txHash": "0x0508a952ecd6269b2c4068353b708750b3bbb750a02061e1e2fdac00776220f8",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)3065",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)3111",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)3089",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:67"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:72"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:78"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:85"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:91"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:97"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:100"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_struct(WishRecord)1818_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:119"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(PityRecord)1827_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:121"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:122"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:123"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:128"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "TIER_THRESHOLDS",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:139"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)160_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)100_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)313_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(PityRecord)1827_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)1818_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)3065": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)3089": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)3111": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)1827_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)1860_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)1818_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "84bc991b7e636144ae037642755ab0437f28038952f86f02add36e98a0adffe1": {
+      "address": "0x5a200b4ce557e53F46f5bD3a6622bC77361a4Db2",
+      "txHash": "0x20bd0950129d7fb7b68e13ca11bc98c1233c63db2417b5e7036f005c47766cd7",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)3099",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)3145",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)3123",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:67"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:72"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:78"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:85"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:91"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:97"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:100"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_array(t_struct(WishRecord)1818_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:119"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(PityRecord)1827_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:121"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:122"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:123"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:128"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "TIER_THRESHOLDS",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:139"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)160_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)100_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)313_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_struct(PityRecord)1827_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)1818_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)3099": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)3123": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)3145": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)1860_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)1827_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)1860_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)1818_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "5a488621178d482c75a6947790c7d0b643570fa2183ef6300fee97616dc3748b": {
+      "address": "0x6A471E9734e3998c0d21B17022f0d8022Da7209A",
+      "txHash": "0x8f7c7fb05cbda0851650b5678bd2075a533fa562bca588d18d69dc0811aff1cd",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)4708",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:33"
+          },
+          {
+            "label": "swapRouter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IPancakeRouter02)4873",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:36"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:38"
+          },
+          {
+            "label": "wbnb",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:39"
+          },
+          {
+            "label": "buybackEnabled",
+            "offset": 20,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:42"
+          },
+          {
+            "label": "buybackPercent",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:43"
+          },
+          {
+            "label": "buybackSlippage",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:46"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)94_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ICloudDreamCore)4708": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPancakeRouter02)4873": {
+            "label": "contract IPancakeRouter02",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "08022a56248cfcb3dd929a2f1e51ff52830ec00fe0e466acd95b70fefc0b76f1": {
+      "address": "0xaD16414f7920d0Cb293c29563cF9213914EccCF8",
+      "txHash": "0x3e27e4ddbca13fa64b5a5af5d0a6263855261f072c202f0909d7f4a49837ff77",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)4708",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:35"
+          },
+          {
+            "label": "seeker",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_address",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:36"
+          },
+          {
+            "label": "resonanceCount",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:39"
+          },
+          {
+            "label": "hasResonatedWith",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:44"
+          },
+          {
+            "label": "dailyResonanceDate",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:50"
+          },
+          {
+            "label": "dailyResonanceCount",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:53"
+          },
+          {
+            "label": "karmaBalance",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:60"
+          },
+          {
+            "label": "allResonances",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_array(t_struct(ResonanceRecord)1552_storage)dyn_storage",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:69"
+          },
+          {
+            "label": "userOutboundResonances",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:72"
+          },
+          {
+            "label": "userInboundResonances",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:73"
+          },
+          {
+            "label": "inviteThreshold",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_uint256",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:76"
+          },
+          {
+            "label": "dailyLimit",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:78"
+          },
+          {
+            "label": "karmaReward",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_uint256",
+            "contract": "DreamDrifter",
+            "src": "contracts/DreamDrifter.sol:81"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)94_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(ResonanceRecord)1552_storage)dyn_storage": {
+            "label": "struct DreamDrifter.ResonanceRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)4708": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(ResonanceRecord)1552_storage": {
+            "label": "struct DreamDrifter.ResonanceRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "source",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "message",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "5006e37ce98375a4b8b7d55bbad620247a114581477261ee797265e947e8e439": {
+      "address": "0xD6dD2ac25e7F470c98eCfea0fdC512ba3AA5f0f9",
+      "txHash": "0x48b1e4ac8634bb8343efdd127403f52a7b9f6e8a8d06f12475409153188dce03",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)4708",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:34"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)4783",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:35"
+          },
+          {
+            "label": "topics",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_struct(Topic)1986_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:53"
+          },
+          {
+            "label": "allTopicIds",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:56"
+          },
+          {
+            "label": "userBets",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:59"
+          },
+          {
+            "label": "hasClaimed",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:63"
+          },
+          {
+            "label": "userParticipatedTopics",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_array(t_bytes32)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:67"
+          },
+          {
+            "label": "topicParticipants",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_bytes32,t_array(t_address)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:68"
+          },
+          {
+            "label": "feeRate",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:70"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)94_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)219_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_string_storage)2_storage": {
+            "label": "string[2]",
+            "numberOfBytes": "64"
+          },
+          "t_array(t_uint256)2_storage": {
+            "label": "uint256[2]",
+            "numberOfBytes": "64"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)4708": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)4783": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_bytes32)dyn_storage)": {
+            "label": "mapping(address => bytes32[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_uint256)2_storage)": {
+            "label": "mapping(address => uint256[2])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_array(t_address)dyn_storage)": {
+            "label": "mapping(bytes32 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))": {
+            "label": "mapping(bytes32 => mapping(address => uint256[2]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Topic)1986_storage)": {
+            "label": "mapping(bytes32 => struct DreamOracle.Topic)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Topic)1986_storage": {
+            "label": "struct DreamOracle.Topic",
+            "members": [
+              {
+                "label": "totalPool",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "optionPools",
+                "type": "t_array(t_uint256)2_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "settled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "outcome",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "3"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "title",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "optionLabels",
+                "type": "t_array(t_string_storage)2_storage",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "25d83fb6a87b1bed1dc00e945d29c40b81370b84a85ed3db94c9e82817c3133a": {
+      "address": "0x28762b626A8294C70627d1f36Fa5b62514745e3E",
+      "txHash": "0xc0eff94befbe8119f0879ad92c62310cbabfac6c8288f578e26a5460ae14610c",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)4708",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)4783",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)4732",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:68"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:71"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:79"
+          },
+          {
+            "label": "hasPaid",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:84"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:92"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:98"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:102"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:105"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(WishRecord)2747_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:124"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_array(t_struct(PityRecord)2756_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:126"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:127"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)2789_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:137"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:138"
+          },
+          {
+            "label": "seekCost",
+            "offset": 0,
+            "slot": "21",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:140"
+          },
+          {
+            "label": "karmaCost",
+            "offset": 0,
+            "slot": "22",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:140"
+          },
+          {
+            "label": "pityBase",
+            "offset": 0,
+            "slot": "23",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:142"
+          },
+          {
+            "label": "pityThreshold",
+            "offset": 0,
+            "slot": "24",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:144"
+          },
+          {
+            "label": "tierThresholds",
+            "offset": 0,
+            "slot": "25",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:145"
+          },
+          {
+            "label": "abyssWinnerRatio",
+            "offset": 0,
+            "slot": "26",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:149"
+          },
+          {
+            "label": "abyssDividendRatio",
+            "offset": 0,
+            "slot": "27",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:153"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)94_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)219_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(PityRecord)2756_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)2747_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)4708": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)4732": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)4783": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)2789_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)2756_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)2789_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)2747_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "6a83f21fca9cda04b1fafed3d4e5ed7267d6dd5123a875e7b40cd5a71f992320": {
+      "address": "0x2108C0C5087486BEBEFC53c0F5A257e33D875068",
+      "txHash": "0xcd40d3bac618ba83ca71a9752077890ca49772b3acfeae8a4d72902b21afb8a4",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)3070",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:47"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)3116",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:49"
+          },
+          {
+            "label": "drifter",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_contract(IDreamDrifter)3094",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "vrfCoordinator",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_contract(VRFCoordinatorV2Interface)95",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:50"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_address",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:52"
+          },
+          {
+            "label": "tribulationCounts",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:59"
+          },
+          {
+            "label": "userTribulationWeight",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:63"
+          },
+          {
+            "label": "totalAbyssHolders",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:68"
+          },
+          {
+            "label": "totalAbyssTribulations",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:71"
+          },
+          {
+            "label": "isAbyssHolder",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:79"
+          },
+          {
+            "label": "hasPaid",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:84"
+          },
+          {
+            "label": "dividendPerShareToken",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:92"
+          },
+          {
+            "label": "xDividendPerShareToken",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_mapping(t_address,t_uint256)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:98"
+          },
+          {
+            "label": "totalDividendsAllocated",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:102"
+          },
+          {
+            "label": "totalDividendsClaimed",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:105"
+          },
+          {
+            "label": "allWishes",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_array(t_struct(WishRecord)1581_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:124"
+          },
+          {
+            "label": "allPityRecords",
+            "offset": 0,
+            "slot": "16",
+            "type": "t_array(t_struct(PityRecord)1590_storage)dyn_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:126"
+          },
+          {
+            "label": "userWishIds",
+            "offset": 0,
+            "slot": "17",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:127"
+          },
+          {
+            "label": "userPityIds",
+            "offset": 0,
+            "slot": "18",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:129"
+          },
+          {
+            "label": "s_requests",
+            "offset": 0,
+            "slot": "19",
+            "type": "t_mapping(t_uint256,t_struct(RequestStatus)1623_storage)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:137"
+          },
+          {
+            "label": "testers",
+            "offset": 0,
+            "slot": "20",
+            "type": "t_mapping(t_address,t_bool)",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:138"
+          },
+          {
+            "label": "seekCost",
+            "offset": 0,
+            "slot": "21",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:140"
+          },
+          {
+            "label": "karmaCost",
+            "offset": 0,
+            "slot": "22",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:140"
+          },
+          {
+            "label": "pityBase",
+            "offset": 0,
+            "slot": "23",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:142"
+          },
+          {
+            "label": "pityThreshold",
+            "offset": 0,
+            "slot": "24",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:144"
+          },
+          {
+            "label": "tierThresholds",
+            "offset": 0,
+            "slot": "25",
+            "type": "t_array(t_uint16)4_storage",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:145"
+          },
+          {
+            "label": "abyssWinnerRatio",
+            "offset": 0,
+            "slot": "26",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:149"
+          },
+          {
+            "label": "abyssDividendRatio",
+            "offset": 0,
+            "slot": "27",
+            "type": "t_uint256",
+            "contract": "DreamSeeker",
+            "src": "contracts/DreamSeeker.sol:153"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)94_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)219_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_struct(PityRecord)1590_storage)dyn_storage": {
+            "label": "struct DreamSeeker.PityRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_struct(WishRecord)1581_storage)dyn_storage": {
+            "label": "struct DreamSeeker.WishRecord[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint16)4_storage": {
+            "label": "uint16[4]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)3070": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamDrifter)3094": {
+            "label": "contract IDreamDrifter",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)3116": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_contract(VRFCoordinatorV2Interface)95": {
+            "label": "contract VRFCoordinatorV2Interface",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(RequestStatus)1623_storage)": {
+            "label": "mapping(uint256 => struct DreamSeeker.RequestStatus)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(PityRecord)1590_storage": {
+            "label": "struct DreamSeeker.PityRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(RequestStatus)1623_storage": {
+            "label": "struct DreamSeeker.RequestStatus",
+            "members": [
+              {
+                "label": "fulfilled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "exists",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "sender",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "isPaid",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(WishRecord)1581_storage": {
+            "label": "struct DreamSeeker.WishRecord",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "user",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "wishText",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "timestamp",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "round",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "tier",
+                "type": "t_uint8",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "reward",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "224"
+          },
+          "t_uint16": {
+            "label": "uint16",
+            "numberOfBytes": "2"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "f21ee677e1b0e200f22dc87dcab41b6758020374c8c78a867a4e9f6129a3af47": {
+      "address": "0x76a5327fa4736B2aDDe48f5ebCd812Ab8fE942f4",
+      "txHash": "0x316322001887c3a47b1b421e59bef22bfcc36c1b0a717e41eb45e99200a17da9",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)1853",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:33"
+          },
+          {
+            "label": "swapRouter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IPancakeRouter02)1943",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:36"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:38"
+          },
+          {
+            "label": "wbnb",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:39"
+          },
+          {
+            "label": "buybackEnabled",
+            "offset": 20,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:42"
+          },
+          {
+            "label": "buybackPercent",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:43"
+          },
+          {
+            "label": "buybackSlippage",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:46"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)7_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ICloudDreamCore)1853": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPancakeRouter02)1943": {
+            "label": "contract IPancakeRouter02",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "f8c8c73feb5ae71c49af45e6afbb523b87cd8ccab747537010e8a3e9cbf2cc0b": {
+      "address": "0x010232DA88126f101774524c01b04f17b8eE2b2A",
+      "txHash": "0x38d57d7f1bfc7d890b83088339cb07044ef7ee489889054df3680775ad67342c",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)2125",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:34"
+          },
+          {
+            "label": "treasury",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IDreamTreasury)2147",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:35"
+          },
+          {
+            "label": "topics",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_mapping(t_bytes32,t_struct(Topic)1358_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:53"
+          },
+          {
+            "label": "allTopicIds",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_array(t_bytes32)dyn_storage",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:56"
+          },
+          {
+            "label": "userBets",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:59"
+          },
+          {
+            "label": "hasClaimed",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_bytes32,t_mapping(t_address,t_bool))",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:63"
+          },
+          {
+            "label": "userParticipatedTopics",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_address,t_array(t_bytes32)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:67"
+          },
+          {
+            "label": "topicParticipants",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_bytes32,t_array(t_address)dyn_storage)",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:68"
+          },
+          {
+            "label": "feeRate",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_uint256",
+            "contract": "DreamOracle",
+            "src": "contracts/DreamOracle.sol:70"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)7_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(ReentrancyGuardStorage)132_storage": {
+            "label": "struct ReentrancyGuardUpgradeable.ReentrancyGuardStorage",
+            "members": [
+              {
+                "label": "_status",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_string_storage)2_storage": {
+            "label": "string[2]",
+            "numberOfBytes": "64"
+          },
+          "t_array(t_uint256)2_storage": {
+            "label": "uint256[2]",
+            "numberOfBytes": "64"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(ICloudDreamCore)2125": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IDreamTreasury)2147": {
+            "label": "contract IDreamTreasury",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_address,t_array(t_bytes32)dyn_storage)": {
+            "label": "mapping(address => bytes32[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_array(t_uint256)2_storage)": {
+            "label": "mapping(address => uint256[2])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_array(t_address)dyn_storage)": {
+            "label": "mapping(bytes32 => address[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_array(t_uint256)2_storage))": {
+            "label": "mapping(bytes32 => mapping(address => uint256[2]))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_mapping(t_address,t_bool))": {
+            "label": "mapping(bytes32 => mapping(address => bool))",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Topic)1358_storage)": {
+            "label": "mapping(bytes32 => struct DreamOracle.Topic)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Topic)1358_storage": {
+            "label": "struct DreamOracle.Topic",
+            "members": [
+              {
+                "label": "totalPool",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "optionPools",
+                "type": "t_array(t_uint256)2_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "settled",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "outcome",
+                "type": "t_uint8",
+                "offset": 1,
+                "slot": "3"
+              },
+              {
+                "label": "endTime",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "title",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "optionLabels",
+                "type": "t_array(t_string_storage)2_storage",
+                "offset": 0,
+                "slot": "6"
+              }
+            ],
+            "numberOfBytes": "256"
+          },
+          "t_uint8": {
+            "label": "uint8",
+            "numberOfBytes": "1"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.ReentrancyGuard": [
+            {
+              "contract": "ReentrancyGuardUpgradeable",
+              "label": "_status",
+              "type": "t_uint256",
+              "src": "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol:43",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

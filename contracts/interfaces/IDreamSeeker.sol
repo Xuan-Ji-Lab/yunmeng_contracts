@@ -4,4 +4,6 @@ pragma solidity ^0.8.20;
 interface IDreamSeeker {
     function isAbyssHolder(address user) external view returns (bool);
     function totalAbyssHolders() external view returns (uint256);
+    function hasPaid(address user) external view returns (bool);
+    function getUserWishCount(address user) external view returns (uint256);
 }

@@ -1,10 +1,11 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@openzeppelin/hardhat-upgrades");
 require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
     solidity: {
-        version: "0.8.20",
+        version: "0.8.22",
         settings: {
             optimizer: {
                 enabled: true,
@@ -14,7 +15,10 @@ module.exports = {
     },
     networks: {
         hardhat: {
-            chainId: 1337 // Standard local chain ID
+            chainId: 1337,
+            forking: {
+                url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
+            }
         },
         bscTestnet: {
             url: "https://bsc-testnet.publicnode.com", // Use the one that works in frontend

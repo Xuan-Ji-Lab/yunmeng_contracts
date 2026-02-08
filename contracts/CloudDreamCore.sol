@@ -1,240 +1,151 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./interfaces/ICloudDreamCore.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract CloudDreamCore is ICloudDreamCore, Ownable, ReentrancyGuard {
-    // --- 结构体定义 ---
-    // --- 结构体定义 ---
-    // (Inherited from ICloudDreamCore)
+/**
+ * @title CloudDreamCore (云梦核心 - 权限与配置中心)
+ * @dev 系统的中央注册表，负责管理全新的 Proxy 架构下的：
+ *      1. 访问控制 (AccessControl): 定义管理员、升级者、配置员等角色。
+ *      2. 系统配置 (Configuration): 存储费率、VRF 参数、合约地址索引。
+ *      注意：该合约不再持有用户资金或业务数据，仅作为配置源。
+ */
+contract CloudDreamCore is Initializable, AccessControlUpgradeable, UUPSUpgradeable {
     
-    // --- 状态变量 ---
+    // --- 角色定义 (Roles) ---
+
+    /// @notice 升级者角色：拥有升级代理合约逻辑实现的权限
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
+    /// @notice 配置员角色：拥有修改系统参数（如费率、VRF）的权限
+    bytes32 public constant CONFIG_ROLE = keccak256("CONFIG_ROLE");
+
+    /// @notice 操作员角色：预留给自动化脚本或 Keeper 的权限
+    bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
+
+    // --- 系统配置状态变量 (Configuration State) ---
     
-    // 模块注册表: 模块名称 -> 地址
-    mapping(string => address) public modules;
-    mapping(address => bool) public isModule;
-
-    // 福报系统 (Karma)
-    mapping(address => uint256) public karmaBalance;
-    mapping(address => uint256) public userTotalPaidSeeks; // Tracking paid seeks
-
-    // 祈愿数据
-    WishRecord[] public allWishes;
-    PityRecord[] public allPityRecords; // Pity Record Storage
-    mapping(address => uint256[]) public userWishIds;
-    mapping(address => uint256[]) public userPityIds;
-
-    // 资产
-    address public wishToken;
+    // 1. 协议费率配置
+    /// @notice 协议费率 (基点)，例如 500 表示 5%
+    uint256 public protocolFeeRate; 
     
-    // --- 修饰符 ---
-    modifier onlyModule() {
-        require(isModule[msg.sender], unicode"Core: 调用者非授权模块");
-        _;
-    }
-
-    constructor() Ownable(msg.sender) {}
-
-    // --- 管理员: 模块管理 ---
-    function registerModule(string calldata key, address moduleAddress) external onlyOwner {
-        require(moduleAddress != address(0), unicode"无效地址");
-        // 如果已存在则覆盖，并移除旧地址权限
-        if (modules[key] != address(0)) {
-            isModule[modules[key]] = false;
-        }
-        modules[key] = moduleAddress;
-        isModule[moduleAddress] = true;
-    }
-
-    function setWishToken(address _token) external onlyOwner {
-        wishToken = _token;
-    }
-
-    // --- 接口实现 ---
-
-    function incrementPaidSeeks(address user) external override onlyModule {
-        userTotalPaidSeeks[user]++;
-    }
-
-    function getUserTotalPaidSeeks(address user) external view override returns (uint256) {
-        return userTotalPaidSeeks[user];
-    }
-
-    function mintKarma(address user, uint256 amount) external override onlyModule {
-        karmaBalance[user] += amount;
-        emit KarmaChanged(user, amount, true);
-    }
-
-    function burnKarma(address user, uint256 amount) external override onlyModule {
-        require(karmaBalance[user] >= amount, unicode"Core: 福报余额不足");
-        karmaBalance[user] -= amount;
-        emit KarmaChanged(user, amount, false);
-    }
-
-    function addWishRecord(
-        address user, 
-        string calldata wishText, 
-        uint256 round, 
-        uint8 tier, 
-        uint256 reward
-    ) external override onlyModule returns (uint256) {
-        uint256 newId = allWishes.length;
-        allWishes.push(WishRecord({
-            id: newId,
-            user: user,
-            wishText: wishText,
-            timestamp: block.timestamp,
-            round: round,
-            tier: tier,
-            reward: reward
-        }));
-        userWishIds[user].push(newId);
-        return newId;
-    }
-
-    function addPityRecord(address user, uint256 amount) external override onlyModule {
-        uint256 newId = allPityRecords.length;
-        allPityRecords.push(PityRecord({
-            id: newId,
-            user: user,
-            amount: amount,
-            timestamp: block.timestamp
-        }));
-        userPityIds[user].push(newId);
-        emit PityTriggered(user, amount); // Emit event for log indexers too
-    }
-
-    function getUserPityIds(address user) external view override returns (uint256[] memory) {
-        return userPityIds[user];
-    }
-
-    function distributeReward(address user, uint256 amount) external override onlyModule nonReentrant {
-        require(address(this).balance >= amount, unicode"Core: BNB 余额不足");
-        (bool success, ) = payable(user).call{value: amount}("");
-        require(success, unicode"Core: BNB 转账失败");
-        emit RewardDistributed(user, amount, "BNB");
-    }
-
-    function distributeTokenReward(address user, uint256 amount) external override onlyModule nonReentrant {
-        require(wishToken != address(0), unicode"Core: 代币地址未设置");
-        require(IERC20(wishToken).balanceOf(address(this)) >= amount, unicode"Core: 代币余额不足");
-        IERC20(wishToken).transfer(user, amount);
-        emit RewardDistributed(user, amount, "WISH");
-    }
-
-    // --- 天道回响 (Pity) 实现 ---
-    mapping(address => uint256) public tribulationCounts;
-
-    function setTribulationCount(address user, uint256 count) external override onlyModule {
-        tribulationCounts[user] = count;
-        // 如果需要，可以在这里抛出 Core 级别的事件，但 Interface 里定义的 PityTriggered 也可以由 Seeker 抛出或这里抛出
-        // 为了一致性，我们在 Core 中不强制抛出 PityTriggered，除非分配奖励时。
-        // 但 Interface 定义了 Event，最好在 Seeker 触发时 emit，或者 Core 的 distribute 附带。
-        // 这里仅作为状态存储。
-    }
-
-    function getTribulationCount(address user) external view override returns (uint256) {
-        return tribulationCounts[user];
-    }
-
-    // --- 视图函数 ---
-    function getUserKarma(address user) external view override returns (uint256) {
-        return karmaBalance[user];
-    }
-
-    function getWishPowerPool() external view override returns (uint256) {
-        return address(this).balance;
-    }
+    /// @notice 协议费接收地址 (通常是 DreamTreasury)
+    address public protocolFeeRecipient; 
     
-    // 支持旧的视图逻辑
-    function getGlobalWishCount() external view returns (uint256) {
-        return allWishes.length;
+    // 2. Chainlink VRF 配置
+    /// @notice VRF Key Hash (Gas Lane)
+    bytes32 public vrfKeyHash;
+    
+    /// @notice VRF Subscription ID
+    uint64 public vrfSubscriptionId;
+    
+    /// @notice VRF 回调 Gas 限制
+    uint32 public vrfCallbackGasLimit;
+    
+    /// @notice VRF 最小确认块数
+    uint16 public vrfRequestConfirmations;
+    
+    // 3. 模块合约注册表 (用于互相发现)
+    /// @notice 国库合约地址
+    address public treasury;
+    
+    /// @notice 寻真(业务)合约地址
+    address public seeker;
+    
+    /// @notice 听澜(共鸣)合约地址
+    address public drifter;
+    
+    /// @notice 问天(预测)合约地址
+    address public oracle;
+    
+    // --- 事件定义 (Events) ---
+    event ConfigUpdated(string key, uint256 newValue);
+    event AddressConfigUpdated(string key, address newAddress);
+    event VRFConfigUpdated(bytes32 keyHash, uint64 subId, uint32 gasLimit, uint16 confirmations);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
     }
 
-    // === 批量查询优化 (减少 RPC 调用) ===
+    /**
+     * @notice 初始化函数 (替代构造函数)
+     * @param _admin 初始管理员地址
+     */
+    function initialize(address _admin) public initializer {
+        __AccessControl_init();
+        __UUPSUpgradeable_init();
 
-    /// @notice 获取用户祈愿记录数量
-    function getUserWishCount(address user) external view returns (uint256) {
-        return userWishIds[user].length;
-    }
-
-    /// @notice 批量获取用户祈愿 ID（分页）
-    /// @param user 用户地址
-    /// @param start 起始索引
-    /// @param count 获取数量
-    function getUserWishIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
-        uint256[] storage ids = userWishIds[user];
-        uint256 total = ids.length;
+        // 授予初始角色
+        _grantRole(DEFAULT_ADMIN_ROLE, _admin);
+        _grantRole(UPGRADER_ROLE, _admin);
+        _grantRole(CONFIG_ROLE, _admin);
         
-        if (start >= total) {
-            return new uint256[](0);
-        }
-        
-        uint256 end = start + count;
-        if (end > total) {
-            end = total;
-        }
-        
-        uint256 resultLength = end - start;
-        uint256[] memory result = new uint256[](resultLength);
-        for (uint256 i = 0; i < resultLength; i++) {
-            result[i] = ids[start + i];
-        }
-        return result;
+        // 设置默认配置
+        protocolFeeRate = 500; // 5%
+        vrfCallbackGasLimit = 500000;
+        vrfRequestConfirmations = 3;
     }
 
-    /// @notice 获取用户天道回响记录数量
-    function getUserPityCount(address user) external view returns (uint256) {
-        return userPityIds[user].length;
+    /**
+     * @notice UUPS 升级授权检查
+     * @dev 仅拥有 UPGRADER_ROLE 的地址可以执行升级
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADER_ROLE) {}
+
+    // --- 配置设置函数 (需 CONFIG_ROLE) ---
+
+    /**
+     * @notice 设置协议费率
+     * @param _rate 新费率 (基点, max 10000)
+     * @param _recipient 接收地址
+     */
+    function setProtocolFee(uint256 _rate, address _recipient) external onlyRole(CONFIG_ROLE) {
+        require(_rate <= 10000, "Rate too high"); // Max 100%
+        protocolFeeRate = _rate;
+        protocolFeeRecipient = _recipient;
+        emit ConfigUpdated("protocolFeeRate", _rate);
+        emit AddressConfigUpdated("protocolFeeRecipient", _recipient);
     }
 
-    /// @notice 批量获取用户天道回响 ID（分页）
-    function getUserPityIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
-        uint256[] storage ids = userPityIds[user];
-        uint256 total = ids.length;
+    /**
+     * @notice 设置 Chainlink VRF 参数
+     */
+    function setVRFConfig(
+        bytes32 _keyHash,
+        uint64 _subId,
+        uint32 _gasLimit,
+        uint16 _confirmations
+    ) external onlyRole(CONFIG_ROLE) {
+        vrfKeyHash = _keyHash;
+        vrfSubscriptionId = _subId;
+        vrfCallbackGasLimit = _gasLimit;
+        vrfRequestConfirmations = _confirmations;
+        emit VRFConfigUpdated(_keyHash, _subId, _gasLimit, _confirmations);
+    }
+
+    /**
+     * @notice 注册/更新模块合约地址
+     * @dev 主要用于合约间互相查询地址，以及前端查询最新合约地址
+     */
+    function setContractAddresses(
+        address _treasury,
+        address _seeker,
+        address _drifter,
+        address _oracle
+    ) external onlyRole(CONFIG_ROLE) {
+        treasury = _treasury;
+        seeker = _seeker;
+        drifter = _drifter;
+        oracle = _oracle;
         
-        if (start >= total) {
-            return new uint256[](0);
-        }
-        
-        uint256 end = start + count;
-        if (end > total) {
-            end = total;
-        }
-        
-        uint256 resultLength = end - start;
-        uint256[] memory result = new uint256[](resultLength);
-        for (uint256 i = 0; i < resultLength; i++) {
-            result[i] = ids[start + i];
-        }
-        return result;
+        emit AddressConfigUpdated("treasury", _treasury);
+        emit AddressConfigUpdated("seeker", _seeker);
+        emit AddressConfigUpdated("drifter", _drifter);
+        emit AddressConfigUpdated("oracle", _oracle);
     }
 
-    /// @notice 批量获取祈愿记录详情
-    function getWishRecordsBatch(uint256[] calldata ids) external view returns (WishRecord[] memory) {
-        uint256 len = ids.length;
-        WishRecord[] memory result = new WishRecord[](len);
-        for (uint256 i = 0; i < len; i++) {
-            require(ids[i] < allWishes.length, unicode"无效ID");
-            result[i] = allWishes[ids[i]];
-        }
-        return result;
-    }
-
-    /// @notice 批量获取天道回响记录详情
-    function getPityRecordsBatch(uint256[] calldata ids) external view returns (PityRecord[] memory) {
-        uint256 len = ids.length;
-        PityRecord[] memory result = new PityRecord[](len);
-        for (uint256 i = 0; i < len; i++) {
-            require(ids[i] < allPityRecords.length, unicode"无效ID");
-            result[i] = allPityRecords[ids[i]];
-        }
-        return result;
-    }
-
-    // 允许接收 BNB (国库/寻真充值)
-    receive() external payable {}
+    // --- 视图函数 (通过 public 变量自动生成) ---
 }

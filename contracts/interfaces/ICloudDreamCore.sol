@@ -2,55 +2,33 @@
 pragma solidity ^0.8.20;
 
 interface ICloudDreamCore {
-    // --- 事件定义 ---
-    // --- 事件定义 ---
-    event KarmaChanged(address indexed user, uint256 amount, bool isAdd); // 福报变更事件
-    event RewardDistributed(address indexed user, uint256 amount, string activeModule); // 奖励发放事件
-    event PityTriggered(address indexed user, uint256 amount); // 天道回响事件
-
-    // --- Structs ---
-    struct WishRecord {
-        uint256 id;
-        address user;
-        string wishText;
-        uint256 timestamp;
-        uint256 round;
-        uint8 tier;
-        uint256 reward;
-    }
-
-    struct PityRecord {
-        uint256 id;
-        address user;
-        uint256 amount;
-        uint256 timestamp;
-    }
-
-    // --- Functions ---
+    // --- Config Getters ---
+    function treasury() external view returns (address);
+    function seeker() external view returns (address);
+    function drifter() external view returns (address);
+    function oracle() external view returns (address);
     
-    function mintKarma(address user, uint256 amount) external;
-    function burnKarma(address user, uint256 amount) external;
-    function getUserKarma(address user) external view returns (uint256);
-
-    function addWishRecord(
-        address user, 
-        string calldata wishText, 
-        uint256 round, 
-        uint8 tier, 
-        uint256 reward
-    ) external returns (uint256);
-
-    function addPityRecord(address user, uint256 amount) external;
-    function getUserPityIds(address user) external view returns (uint256[] memory);
+    function protocolFeeRate() external view returns (uint256);
+    function protocolFeeRecipient() external view returns (address);
     
-    function incrementPaidSeeks(address user) external;
-    function getUserTotalPaidSeeks(address user) external view returns (uint256);
-    
-    function getWishPowerPool() external view returns (uint256);
+    function vrfKeyHash() external view returns (bytes32);
+    function vrfSubscriptionId() external view returns (uint64);
+    function vrfCallbackGasLimit() external view returns (uint32);
+    function vrfRequestConfirmations() external view returns (uint16);
 
-    function setTribulationCount(address user, uint256 count) external;
-    function getTribulationCount(address user) external view returns (uint256);
+    // --- AccessControl ---
+    function hasRole(bytes32 role, address account) external view returns (bool);
+    function UPGRADER_ROLE() external view returns (bytes32);
+    function CONFIG_ROLE() external view returns (bytes32);
+    function OPERATOR_ROLE() external view returns (bytes32);
+
+    // --- Legacy Access (Still needed for events?) ---
+    // Events might be emitted by Core or by Modules directly.
+    // If Modules emit them, we don't strictly need them here, but good for reference.
+    event KarmaChanged(address indexed user, uint256 amount, bool isAdd);
     
-    function distributeReward(address user, uint256 amount) external;
-    function distributeTokenReward(address user, uint256 amount) external;
+    // --- No more distributeReward / mintKarma / etc. in Core Logic ---
+    // Core is now just config. Pity/Karma state is in Modules (Drifter/Seeker).
+    // Wait, implementation plan says Drifter/Oracle persist data in Proxy Storage.
+    // So Core interface is just Config.
 }
