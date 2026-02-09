@@ -38,7 +38,7 @@ contract DreamSeeker is
     IDreamTreasury public treasury;
     IDreamDrifter public drifter;
     VRFCoordinatorV2Interface public vrfCoordinator;
-    address public wishToken;
+    address private wishToken;
     
     // --- 状态变量 (业务数据) ---
     
@@ -86,6 +86,7 @@ contract DreamSeeker is
         uint256 round;
         uint8 tier;
         uint256 reward;
+        uint256 holdersAtTime; // 归墟触发时的持有者数量
     }
     
     struct PityRecord {
@@ -139,7 +140,7 @@ contract DreamSeeker is
     event SeekRequestSent(uint256 indexed requestId, address indexed user);
     event SeekResult(address indexed user, uint8 tier, uint256 reward, string wishText);
     event AbyssTriggered(address indexed user, bool isGrandFinale, uint256 tribulationCount);
-    event PityTriggered(address indexed user, uint256 amount);
+    event PityTriggered(address indexed user, uint256 amount, uint256 weight);
     event DividendClaimed(address indexed user, uint256 amount);
     event FundsForwarded(address indexed sender, uint256 amount);
     event PayoutFailed(address indexed user, uint256 amount, string reason); // VRF 安全: 支付失败时记录
@@ -336,7 +337,7 @@ contract DreamSeeker is
             
             // 3. 资金分配 (50/30/20)
             // 计算净奖池 = 国库余额 - 应付未付分红
-            uint256 treasuryBal = IERC20(wishToken).balanceOf(address(treasury));
+            uint256 treasuryBal = IERC20(treasury.wishToken()).balanceOf(address(treasury));
             uint256 unclaimed = totalDividendsAllocated - totalDividendsClaimed;
             // 确保不发生下溢
             uint256 netPool = (treasuryBal > unclaimed) ? (treasuryBal - unclaimed) : 0;
@@ -406,7 +407,8 @@ contract DreamSeeker is
             // 保底判定 (Pity Check)
             if (tribCount >= pityThreshold) {
                 // 触发保底: 发放 BNB 奖励
-                uint256 pityReward = userTribulationWeight[user] * pityBase; 
+                uint256 pityReward = userTribulationWeight[user] * pityBase;
+                uint256 weightToEmit = userTribulationWeight[user]; // 保存权重用于事件
                 
                 // VRF 安全: 使用 try-catch 防止支付失败导致回调 revert
                 try treasury.payoutBNB(user, pityReward) {
@@ -414,7 +416,7 @@ contract DreamSeeker is
                 } catch {
                     emit PayoutFailed(user, pityReward, "PITY_BNB");
                 }
-                _addPityRecord(user, pityReward);
+                _addPityRecord(user, pityReward, weightToEmit);
                 
                 // 重置状态
                 tribCount = 0;
@@ -424,29 +426,32 @@ contract DreamSeeker is
         
         tribulationCounts[user] = tribCount;
         
-        // 记录祈愿历史
-        _addWishRecord(user, wishText, tier, reward);
+        // 记录祈愿历史 (归墟使用劫数作为期号，并记录当时持有者数)
+        uint256 roundNum = (tier == 0) ? totalAbyssTribulations : 0;
+        uint256 holders = (tier == 0) ? totalAbyssHolders : 0;
+        _addWishRecord(user, wishText, tier, reward, roundNum, holders);
         
         emit SeekResult(user, tier, reward, wishText);
     }
     
     // --- 内部存储辅助函数 ---
 
-    function _addWishRecord(address user, string memory text, uint8 tier, uint256 reward) internal {
+    function _addWishRecord(address user, string memory text, uint8 tier, uint256 reward, uint256 round, uint256 holders) internal {
         uint256 newId = allWishes.length;
         allWishes.push(WishRecord({
             id: newId,
             user: user,
             wishText: text,
             timestamp: block.timestamp,
-            round: 0,
+            round: round,
             tier: tier,
-            reward: reward
+            reward: reward,
+            holdersAtTime: holders
         }));
         userWishIds[user].push(newId);
     }
     
-    function _addPityRecord(address user, uint256 amount) internal {
+    function _addPityRecord(address user, uint256 amount, uint256 weight) internal {
         uint256 newId = allPityRecords.length;
         allPityRecords.push(PityRecord({
             id: newId,
@@ -455,7 +460,7 @@ contract DreamSeeker is
             timestamp: block.timestamp
         }));
         userPityIds[user].push(newId);
-        emit PityTriggered(user, amount);
+        emit PityTriggered(user, amount, weight);
     }
 
     // --- 分红领取逻辑 ---
