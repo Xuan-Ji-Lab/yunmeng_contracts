@@ -245,4 +245,44 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
         );
         core = ICloudDreamCore(_core);
     }
+
+    // --- Admin Withdrawal Functions ---
+
+    /**
+     * @notice 管理员提取运营资金 (BNB)
+     * @dev 用于提取盈余或紧急转移资金
+     * @param to 接收地址
+     * @param amount 提取金额 (Wei)
+     */
+    function adminWithdrawBNB(address payable to, uint256 amount) external {
+        require(
+            core.hasRole(0x00, msg.sender), // DEFAULT_ADMIN_ROLE
+            "Treasury: only admin"
+        );
+        require(to != address(0), unicode"无效地址");
+        require(amount <= address(this).balance, unicode"余额不足");
+        
+        to.transfer(amount);
+        emit PayoutExecuted(to, amount, "BNB_ADMIN");
+    }
+
+    /**
+     * @notice 管理员提取代币资产
+     * @dev 用于提取 WISH 税收或误转入的其他代币
+     * @param token 代币合约地址
+     * @param to 接收地址
+     * @param amount 提取金额
+     */
+    function adminWithdrawToken(address token, address to, uint256 amount) external {
+        require(
+            core.hasRole(0x00, msg.sender), // DEFAULT_ADMIN_ROLE
+            "Treasury: only admin"
+        );
+        require(token != address(0), unicode"无效代币");
+        require(to != address(0), unicode"无效地址");
+        require(IERC20(token).balanceOf(address(this)) >= amount, unicode"代币余额不足");
+        
+        IERC20(token).transfer(to, amount);
+        emit PayoutExecuted(to, amount, "TOKEN_ADMIN");
+    }
 }

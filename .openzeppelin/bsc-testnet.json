@@ -5937,6 +5937,143 @@
           ]
         }
       }
+    },
+    "018244527f251b6ad01e7bf7d3007e61e77ad5a088d4027f669073127e58a526": {
+      "address": "0xcc9df0F07058A96984366C739b781473abCa1aa4",
+      "txHash": "0x7ff2872ec0ebd64aa814d9120d0c019ffc641f029ec1b44e62f672d34ab83c7f",
+      "layout": {
+        "solcVersion": "0.8.22",
+        "storage": [
+          {
+            "label": "core",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_contract(ICloudDreamCore)2016",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:30"
+          },
+          {
+            "label": "swapRouter",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_contract(IPancakeRouter02)2139",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:36"
+          },
+          {
+            "label": "wishToken",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:39"
+          },
+          {
+            "label": "wbnb",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:39"
+          },
+          {
+            "label": "buybackEnabled",
+            "offset": 20,
+            "slot": "3",
+            "type": "t_bool",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:46"
+          },
+          {
+            "label": "buybackPercent",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:48"
+          },
+          {
+            "label": "buybackSlippage",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_uint256",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:49"
+          },
+          {
+            "label": "flapPortal",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_address",
+            "contract": "DreamTreasury",
+            "src": "contracts/DreamTreasury.sol:52"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)7_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_contract(ICloudDreamCore)2016": {
+            "label": "contract ICloudDreamCore",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IPancakeRouter02)2139": {
+            "label": "contract IPancakeRouter02",
+            "numberOfBytes": "20"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
     }
   }
 }

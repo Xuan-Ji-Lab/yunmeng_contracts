@@ -115,6 +115,7 @@ contract DreamSeeker is
         string wishText;
         bool isPaid;
         uint256 batchSize; // New: Number of wishes in this request
+        uint256 timestamp; // VRF 超时退款: 请求时间戳
     }
     mapping(uint256 => RequestStatus) public s_requests;
 
@@ -140,6 +141,8 @@ contract DreamSeeker is
     event PityTriggered(address indexed user, uint256 amount);
     event DividendClaimed(address indexed user, uint256 amount);
     event FundsForwarded(address indexed sender, uint256 amount);
+    event PayoutFailed(address indexed user, uint256 amount, string reason); // VRF 安全: 支付失败时记录
+    event RefundIssued(uint256 indexed requestId, address indexed user, uint256 amount); // VRF 超时退款
 
     /// @notice 仅由 VRF Coordinator 调用的错误
     error OnlyCoordinatorCanFulfill(address have, address want);
@@ -262,7 +265,8 @@ contract DreamSeeker is
             sender: msg.sender,
             wishText: wishText,
             isPaid: isPaid,
-            batchSize: numWords
+            batchSize: numWords,
+            timestamp: block.timestamp
         });
 
         emit SeekRequestSent(requestId, msg.sender);
@@ -353,9 +357,12 @@ contract DreamSeeker is
                          // 2. 余数 (Dust) 补给最后的中奖者
                          uint256 dust = netPool - actualDistributed;
                          if (dust > 0) {
-                             treasury.payoutToken(user, dust);
-                             reward += dust;
-                         }
+                              try treasury.payoutToken(user, dust) {
+                                  reward += dust;
+                              } catch {
+                                  emit PayoutFailed(user, dust, "DUST_PAYOUT");
+                              }
+                          }
                      }
                  } else {
                      // 常规: X% Winner, Y% Dividends, Remain Treasury
@@ -364,10 +371,13 @@ contract DreamSeeker is
                      // 剩下的 % + Dust 自动留在池子滚存
                      
                      // 1. 支付中奖者 (Winner)
-                     if (winnerAmt > 0) {
-                         treasury.payoutToken(user, winnerAmt);
-                         reward = winnerAmt;
-                     }
+                      if (winnerAmt > 0) {
+                          try treasury.payoutToken(user, winnerAmt) {
+                              reward = winnerAmt;
+                          } catch {
+                              emit PayoutFailed(user, winnerAmt, "WINNER_PAYOUT");
+                          }
+                      }
                      
                      // 2. 注入分红池 (Dividend)
                      if (dividendAmt > 0 && totalAbyssHolders > 0) {
@@ -397,7 +407,12 @@ contract DreamSeeker is
                 // 触发保底: 发放 BNB 奖励
                 uint256 pityReward = userTribulationWeight[user] * pityBase; 
                 
-                treasury.payoutBNB(user, pityReward);
+                // VRF 安全: 使用 try-catch 防止支付失败导致回调 revert
+                try treasury.payoutBNB(user, pityReward) {
+                    // 支付成功
+                } catch {
+                    emit PayoutFailed(user, pityReward, "PITY_BNB");
+                }
                 _addPityRecord(user, pityReward);
                 
                 // 重置状态
@@ -583,5 +598,38 @@ contract DreamSeeker is
         require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Seeker: unauthorized");
         // Simple Update
         tierThresholds = _thresholds;
+    }
+
+    // --- VRF 超时退款 (Stale Request Refund) ---
+
+    /**
+     * @notice VRF 超时退款机制
+     * @dev 如果 VRF 服务中断超过 1 小时，用户可申请退款
+     * @param requestId VRF 请求 ID
+     */
+    function refundStaleRequest(uint256 requestId) external nonReentrant {
+        RequestStatus storage req = s_requests[requestId];
+        
+        require(req.exists, unicode"无效请求");
+        require(req.sender == msg.sender, unicode"非请求发起人");
+        require(!req.fulfilled, unicode"请求已完成");
+        require(
+            block.timestamp - req.timestamp > 1 hours,
+            unicode"超时1小时后可退款"
+        );
+        
+        // 计算退款金额 (batch 支持)
+        uint256 refundAmount = req.isPaid ? (seekCost * req.batchSize) : 0;
+        
+        // 清理状态
+        delete s_requests[requestId];
+        
+        // 退款 (BNB)
+        if (refundAmount > 0) {
+            (bool success, ) = payable(msg.sender).call{value: refundAmount}("");
+            require(success, unicode"退款失败");
+        }
+        
+        emit RefundIssued(requestId, msg.sender, refundAmount);
     }
 }
