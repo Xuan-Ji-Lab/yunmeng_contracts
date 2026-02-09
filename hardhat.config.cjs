@@ -30,12 +30,16 @@ module.exports = {
         }
     },
     etherscan: {
-        apiKey: {
-            bscTestnet: process.env.BSCSCAN_API_KEY || ""
-        }
+        apiKey: process.env.BSCSCAN_API_KEY,
+        customChains: [
+            {
+                network: "bscTestnet",
+                chainId: 97,
+                urls: {
+                    apiURL: "https://api-testnet.bscscan.com/api",
+                    browserURL: "https://testnet.bscscan.com"
+                }
+            }
+        ]
     },
-    // BSC 测试链 Chainlink VRF v2 配置 (供参考)
-    // VRF Coordinator: 0x6A2AAd07396B36Fe02a22b33cf443582f682c82f
-    // Key Hash: 0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314
-    // LINK Token: 0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06
 };

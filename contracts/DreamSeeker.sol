@@ -118,8 +118,7 @@ contract DreamSeeker is
     }
     mapping(uint256 => RequestStatus) public s_requests;
 
-    // --- 测试者白名单 (用于触发后门) ---
-    mapping(address => bool) public testers;
+
 
     // --- 核心常量 ---
     // --- 配置参数 (Configurable State Variables) ---
@@ -178,7 +177,7 @@ contract DreamSeeker is
         abyssWinnerRatio = 50;   // 50%
         abyssDividendRatio = 30; // 30%
         
-        testers[msg.sender] = true; // 部署者默认为测试员
+
     }
 
     function _authorizeUpgrade(address newImplementation) internal override {
@@ -188,14 +187,7 @@ contract DreamSeeker is
         );
     }
     
-    modifier onlyTester() {
-        // Allow testers OR anyone with OPERATOR_ROLE (e.g. dev/admin)
-        require(
-            testers[msg.sender] || core.hasRole(core.OPERATOR_ROLE(), msg.sender), 
-            unicode"仅限测试者"
-        );
-        _;
-    }
+
 
     // --- 寻真核心业务逻辑 (Seek Truth) ---
 
@@ -276,13 +268,7 @@ contract DreamSeeker is
         emit SeekRequestSent(requestId, msg.sender);
     }
 
-    /**
-     * @notice 仅请求 VRF (Debug Mode)
-     * @dev 绕过支付和业务逻辑，仅测试 VRF 集成。
-     */
-    function debugSeek() external onlyTester {
-        requestRandomWords("Debug Wish", false, 1);
-    }
+
 
     // --- VRF 回调逻辑 ---
 
@@ -488,26 +474,7 @@ contract DreamSeeker is
         emit DividendClaimed(msg.sender, pending);
     }
 
-    // --- 测试后门 (还原逻辑) ---
-    function testForceAbyss(string memory wishText) external payable onlyTester nonReentrant {
-        _processResult(msg.sender, wishText, 0); // 强制模拟归墟结果
-    }
 
-    // 强制触发保底测试
-    function testForcePity(uint256 weight) external onlyTester nonReentrant {
-        address user = msg.sender;
-        uint256 pityReward = weight * pityBase;
-        treasury.payoutBNB(user, pityReward);
-        _addPityRecord(user, pityReward);
-    }
-    
-    function setTester(address _tester, bool _allowed) external {
-        require(
-            core.hasRole(core.CONFIG_ROLE(), msg.sender),
-            "Seeker: unauthorized config"
-        );
-        testers[_tester] = _allowed;
-    }
     
     // --- 视图辅助 (Batch Query) ---
     /**

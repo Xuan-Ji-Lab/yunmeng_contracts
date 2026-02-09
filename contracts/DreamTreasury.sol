@@ -161,8 +161,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
      * @param amount 用于回购的 BNB 数量 (0 表示全部余额)
      */
     function executeBuyback(uint256 amount) external {
-        // 鉴权: 仅允许特定角色或为了测试允许任何人 (当前逻辑为 Open for ease of testing/triggering)
-        // require(core.hasRole(core.OPERATOR_ROLE(), msg.sender), "Treasury: unauthorized");
+        require(core.hasRole(core.OPERATOR_ROLE(), msg.sender), "Treasury: unauthorized");
         
         // 如果 amount == 0, 使用合约内所有余额
         uint256 available = amount;

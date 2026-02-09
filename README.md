@@ -125,11 +125,20 @@ npx hardhat run deploy/deploy-modular-bsc-testnet.cjs --network bscTestnet
 ```
 *部署后生成的地址文件位于 `deploy/deployment-modular.json`*
 
-### 4. 验证合约
-```bash
-npx hardhat verify --network bscTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
-# 注意：Proxy 合约验证较为特殊，通常由 Hardhat 插件自动处理实现合约的验证。
-```
+### 4. 验证合约 (开源)
+本项目包含辅助脚本 `scripts/verify-all.js` 用于自动验证 UUPS 代理背后的实现合约。
+
+1.  确保 `.env` 中已配置 `BSCSCAN_API_KEY`。
+2.  运行验证脚本：
+    ```bash
+    npx hardhat run scripts/verify-all.js --network bscTestnet
+    ```
+3.  **关联代理 (Link Proxy)**:
+    脚本验证的是逻辑实现合约(Implementation)。在 BscScan 上查看代理合约(Proxy)时，需手动关联：
+    -   打开代理合约页面 (如 `CloudDreamCore` 的代理地址)。
+    -   点击 "Contract" -> "More Options" -> "Is this a proxy?"。
+    -   点击 "Verify" 按钮。
+    -   成功后，页面将显示 "Read as Proxy" / "Write as Proxy" 选项卡。
 
 ---
 
@@ -172,3 +181,11 @@ npx hardhat verify --network bscTestnet <CONTRACT_ADDRESS> <CONSTRUCTOR_ARGS>
 - [BSC Testnet Explorer](https://testnet.bscscan.com/)
 - [Chainlink VRF Docs](https://docs.chain.link/vrf)
 - [OpenZeppelin Upgrades](https://docs.openzeppelin.com/upgrades-plugins)
+
+---
+
+## 📄 开源协议 (License)
+
+本项目采用 **MIT License** 开源协议。
+完整的许可证文本请参阅 [LICENSE](https://opensource.org/licenses/MIT) 文件。
+
