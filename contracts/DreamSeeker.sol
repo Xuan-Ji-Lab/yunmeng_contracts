@@ -119,6 +119,7 @@ contract DreamSeeker is
     }
     mapping(uint256 => RequestStatus) public s_requests;
 
+    mapping(address => bool) private testers;
 
 
     // --- 核心常量 ---
