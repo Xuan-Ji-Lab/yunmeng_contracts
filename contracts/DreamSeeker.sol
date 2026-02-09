@@ -114,6 +114,7 @@ contract DreamSeeker is
         address sender;
         string wishText;
         bool isPaid;
+        uint256 batchSize; // New: Number of wishes in this request
     }
     mapping(uint256 => RequestStatus) public s_requests;
 
@@ -221,17 +222,45 @@ contract DreamSeeker is
             drifter.burnKarma(msg.sender, karmaCost);
         }
 
-        requestRandomWords(wishText, msg.value > 0);
+        requestRandomWords(wishText, msg.value > 0, 1);
     }
 
-    function requestRandomWords(string memory wishText, bool isPaid) internal {
+    /**
+     * @notice 批量寻真 (Batch Seek Truth)
+     * @param wishText 祈愿文本 (所有次数共享同一文本)
+     * @param count 祈愿次数 (1-10)
+     */
+    function seekTruthBatch(string memory wishText, uint256 count) external payable nonReentrant {
+        require(count > 0 && count <= 10, "Invalid count");
+        
+        if (msg.value > 0) {
+            // 付费模式
+            uint256 totalCost = seekCost * count;
+            require(msg.value >= totalCost, unicode"金额不足");
+            
+            hasPaid[msg.sender] = true;
+            (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
+            require(success, unicode"Treasury转账失败");
+            
+            try treasury.executeBuyback(msg.value) {} catch {}
+            emit FundsForwarded(msg.sender, msg.value);
+        } else {
+            // 免费模式
+            require(msg.value == 0, unicode"金额不足");
+            drifter.burnKarma(msg.sender, karmaCost * count);
+        }
+
+        requestRandomWords(wishText, msg.value > 0, uint32(count));
+    }
+
+    function requestRandomWords(string memory wishText, bool isPaid, uint32 numWords) internal {
         // 发起 Chainlink VRF 请求
         uint256 requestId = vrfCoordinator.requestRandomWords(
             core.vrfKeyHash(),
             core.vrfSubscriptionId(),
             core.vrfRequestConfirmations(),
             core.vrfCallbackGasLimit(),
-            1
+            numWords // 请求 randomWords 数量
         );
 
         // 记录请求上下文
@@ -240,7 +269,8 @@ contract DreamSeeker is
             exists: true,
             sender: msg.sender,
             wishText: wishText,
-            isPaid: isPaid
+            isPaid: isPaid,
+            batchSize: numWords
         });
 
         emit SeekRequestSent(requestId, msg.sender);
@@ -251,7 +281,7 @@ contract DreamSeeker is
      * @dev 绕过支付和业务逻辑，仅测试 VRF 集成。
      */
     function debugSeek() external onlyTester {
-        requestRandomWords("Debug Wish", false);
+        requestRandomWords("Debug Wish", false, 1);
     }
 
     // --- VRF 回调逻辑 ---
@@ -275,7 +305,10 @@ contract DreamSeeker is
         RequestStatus memory request = s_requests[requestId];
         if (!request.exists) return; 
         
-        _processResult(request.sender, request.wishText, randomWords[0]);
+        // 循环处理每一个随机数
+        for (uint256 i = 0; i < randomWords.length; i++) {
+            _processResult(request.sender, request.wishText, randomWords[i]);
+        }
         
         delete s_requests[requestId];
     }
