@@ -57,24 +57,23 @@ contract DreamSeeker is
     uint256 public totalAbyssTribulations; 
     
     /// @notice 是否为归墟持有者 (才有资格分红)
-    /// @notice 是否为归墟持有者 (才有资格分红)
     mapping(address => bool) public isAbyssHolder;
     
     /// @notice 是否为付费用户 (Anti-Sybil)
     mapping(address => bool) public hasPaid;
     
-    // 分红系统 (Dividend System)
-    /// @notice 每 Token 全局累积收益 (放大 1e18 倍)
-    uint256 public dividendPerShareToken;
+    // 分红系统 (Dividend System) - V2: 自动发放
+    /// @notice 每个用户的归墟份额 (每次触发归墟 +1)
+    mapping(address => uint256) public userAbyssShares;
     
-    /// @notice 用户已结算的每 Token 收益游标
-    mapping(address => uint256) public xDividendPerShareToken;
+    /// @notice 全局总归墟份额
+    uint256 public totalAbyssShares;
     
-    /// @notice 总已分配分红
-    uint256 public totalDividendsAllocated;
+    /// @notice 归墟持有者地址列表 (用于遍历自动发放)
+    address[] public abyssHolderList;
     
-    /// @notice 总已领取分红
-    uint256 public totalDividendsClaimed;
+    /// @notice 累计已发放分红总额
+    uint256 public totalDividendsDistributed;
 
     // --- 历史记录存储 (还原逻辑) ---
     
@@ -86,13 +85,25 @@ contract DreamSeeker is
         uint256 round;
         uint8 tier;
         uint256 reward;
-        uint256 holdersAtTime; // 归墟触发时的持有者数量
+        uint256 holdersAtTime;   // 归墟触发时的持有者数量
+        uint256 poolAtTime;      // 归墟触发时的奖池总额
+        uint256 dividendAtTime;  // 本次发放的分红总额
     }
     
     struct PityRecord {
         uint256 id;
         address user;
         uint256 amount;
+        uint256 timestamp;
+    }
+
+    struct DividendRecord {
+        uint256 id;
+        address user;
+        uint256 amount;
+        uint256 shares;
+        uint256 round;
+        uint256 pool;
         uint256 timestamp;
     }
 
@@ -107,6 +118,9 @@ contract DreamSeeker is
     
     /// @notice 用户保底 ID 索引
     mapping(address => uint256[]) public userPityIds;
+
+    /// @notice 全局分红历史记录
+
 
     // --- VRF 请求状态 ---
     struct RequestStatus {
@@ -134,14 +148,31 @@ contract DreamSeeker is
     // 归墟分配比例 (基点, Sum <= 100)
     uint256 public abyssWinnerRatio;   // 赢家比例 (e.g. 50)
     uint256 public abyssDividendRatio; // 分红比例 (e.g. 30)
-    // 剩余部分自动留存 Treasury
 
+    // --- New Storage Variables for Upgrade (Must be appended) ---
+    /// @notice 全局分红历史记录
+    DividendRecord[] public allDividendRecords;
+
+    /// @notice 用户分红 ID 索引
+    mapping(address => uint256[]) public userDividendIds;
+
+    /// @notice 祈愿记录区块号索引
+    mapping(uint256 => uint256) public wishBlockNumbers;
+
+    /// @notice 保底记录区块号索引
+    mapping(uint256 => uint256) public pityBlockNumbers;
+
+    /// @notice 分红记录区块号索引
+    mapping(uint256 => uint256) public dividendBlockNumbers;
+
+    // 剩余部分自动留存 Treasury
+    
     // --- 事件 ---
     event SeekRequestSent(uint256 indexed requestId, address indexed user);
     event SeekResult(address indexed user, uint8 tier, uint256 reward, string wishText);
     event AbyssTriggered(address indexed user, bool isGrandFinale, uint256 tribulationCount);
     event PityTriggered(address indexed user, uint256 amount, uint256 weight);
-    event DividendClaimed(address indexed user, uint256 amount);
+    event DividendDistributed(address indexed holder, uint256 amount, uint256 shares, uint256 round, uint256 pool);
     event FundsForwarded(address indexed sender, uint256 amount);
     event PayoutFailed(address indexed user, uint256 amount, string reason); // VRF 安全: 支付失败时记录
     event RefundIssued(uint256 indexed requestId, address indexed user, uint256 amount); // VRF 超时退款
@@ -203,6 +234,7 @@ contract DreamSeeker is
      */
     function seekTruth(string memory wishText) external payable nonReentrant {
         if (msg.value >= seekCost) {
+            // 付费模式
             hasPaid[msg.sender] = true;
             
             // 付费模式: 资金转发给 Treasury (使用 call 避免 2300 gas 限制)
@@ -313,6 +345,8 @@ contract DreamSeeker is
         uint8 tier;
         uint256 reward = 0;
         uint256 tribCount = tribulationCounts[user];
+        uint256 poolSnapshot = 0;     // 本次奖池快照
+        uint256 dividendSnapshot = 0; // 本次分红快照
 
         if (rng < tierThresholds[0]) {
             // === 触发归墟 (Abyss) ===
@@ -324,9 +358,10 @@ contract DreamSeeker is
             if (!isAbyssHolder[user]) {
                 isAbyssHolder[user] = true;
                 totalAbyssHolders++;
-                // 新人如入场，设置当期分红起点 (不能领以前的)
-                xDividendPerShareToken[user] = dividendPerShareToken;
+                abyssHolderList.push(user); // 记录地址用于遍历
             }
+            userAbyssShares[user]++;  // 归墟份额 +1
+            totalAbyssShares++;       // 全局份额 +1
             
             // 2. 更新归墟总进度 (81次为终局)
             bool isGrandFinale = (totalAbyssTribulations + 1 >= 81);
@@ -335,60 +370,35 @@ contract DreamSeeker is
             
             emit AbyssTriggered(user, isGrandFinale, totalAbyssTribulations);
             
-            // 3. 资金分配 (50/30/20)
-            // 计算净奖池 = 国库余额 - 应付未付分红
-            uint256 treasuryBal = IERC20(treasury.wishToken()).balanceOf(address(treasury));
-            uint256 unclaimed = totalDividendsAllocated - totalDividendsClaimed;
-            // 确保不发生下溢
-            uint256 netPool = (treasuryBal > unclaimed) ? (treasuryBal - unclaimed) : 0;
+            // 3. 资金分配 — V2: 直接奖池余额, 自动发放
+            uint256 netPool = IERC20(wishToken).balanceOf(address(treasury));
+            poolSnapshot = netPool;
             
             if (netPool > 0) {
                  if (isGrandFinale) {
-                     // 终局: 100% 分红给所有人
-                     // 1. 计算分红
-                     if (totalAbyssHolders > 0) {
-                         uint256 sharePerToken = (netPool * 1e18) / totalAbyssHolders;
-                         dividendPerShareToken += sharePerToken;
-                         
-                         // 计算实际分配出去的总额 (排除精度余数)
-                         // 实际分配 = (sharePerToken * totalAbyssHolders) / 1e18
-                         // 注意：这里为了保持精度一致性，我们直接更新 allocated
-                         uint256 actualDistributed = (sharePerToken * totalAbyssHolders) / 1e18;
-                         totalDividendsAllocated += actualDistributed; // 实际可领取的总额
-                         
-                         // 2. 余数 (Dust) 补给最后的中奖者
-                         uint256 dust = netPool - actualDistributed;
-                         if (dust > 0) {
-                              try treasury.payoutToken(user, dust) {
-                                  reward += dust;
-                              } catch {
-                                  emit PayoutFailed(user, dust, "DUST_PAYOUT");
-                              }
-                          }
-                     }
+                     // 终局: 100% 奖池全部按份额分发给所有人
+                     dividendSnapshot = netPool;
+                     _distributeDividends(netPool, totalAbyssTribulations, poolSnapshot);
                  } else {
-                     // 常规: X% Winner, Y% Dividends, Remain Treasury
+                     // 常规: X% Winner, Y% Dividends, 20% 留存
                      uint256 winnerAmt = (netPool * abyssWinnerRatio) / 100;
                      uint256 dividendAmt = (netPool * abyssDividendRatio) / 100;
-                     // 剩下的 % + Dust 自动留在池子滚存
+                     dividendSnapshot = dividendAmt;
                      
-                     // 1. 支付中奖者 (Winner)
-                      if (winnerAmt > 0) {
-                          try treasury.payoutToken(user, winnerAmt) {
-                              reward = winnerAmt;
-                          } catch {
-                              emit PayoutFailed(user, winnerAmt, "WINNER_PAYOUT");
-                          }
-                      }
-                     
-                     // 2. 注入分红池 (Dividend)
-                     if (dividendAmt > 0 && totalAbyssHolders > 0) {
-                         uint256 sharePerToken = (dividendAmt * 1e18) / totalAbyssHolders;
-                         dividendPerShareToken += sharePerToken;
-                         
-                         uint256 actualDistributed = (sharePerToken * totalAbyssHolders) / 1e18;
-                         totalDividendsAllocated += actualDistributed;
+                     // 1. 支付中奖者 (50%)
+                     if (winnerAmt > 0) {
+                         try treasury.payoutToken(user, winnerAmt) {
+                             reward = winnerAmt;
+                         } catch {
+                             emit PayoutFailed(user, winnerAmt, "WINNER");
+                         }
                      }
+                     
+                     // 2. 自动分发分红 (30%) 给所有归墟持有者
+                     if (dividendAmt > 0 && totalAbyssShares > 0) {
+                         _distributeDividends(dividendAmt, totalAbyssTribulations, poolSnapshot);
+                     }
+                     // 20% 自动留在国库
                  }
             }
         } else {
@@ -412,13 +422,11 @@ contract DreamSeeker is
                 
                 // VRF 安全: 使用 try-catch 防止支付失败导致回调 revert
                 try treasury.payoutBNB(user, pityReward) {
-                    // 支付成功
                 } catch {
                     emit PayoutFailed(user, pityReward, "PITY_BNB");
                 }
                 _addPityRecord(user, pityReward, weightToEmit);
                 
-                // 重置状态
                 tribCount = 0;
                 userTribulationWeight[user] = 0;
             }
@@ -429,14 +437,37 @@ contract DreamSeeker is
         // 记录祈愿历史 (归墟使用劫数作为期号，并记录当时持有者数)
         uint256 roundNum = (tier == 0) ? totalAbyssTribulations : 0;
         uint256 holders = (tier == 0) ? totalAbyssHolders : 0;
-        _addWishRecord(user, wishText, tier, reward, roundNum, holders);
+        _addWishRecord(user, wishText, tier, reward, roundNum, holders, poolSnapshot, dividendSnapshot);
         
         emit SeekResult(user, tier, reward, wishText);
     }
     
+    /**
+     * @notice 自动分发分红给所有归墟持有者 (按份额比例)
+     * @dev 归墟最多 81 次，holder 数量有限，gas 可控
+     */
+    function _distributeDividends(uint256 totalAmount, uint256 round, uint256 pool) internal {
+        for (uint i = 0; i < abyssHolderList.length; i++) {
+            address holder = abyssHolderList[i];
+            uint256 shares = userAbyssShares[holder];
+            if (shares == 0) continue;
+            
+            uint256 payout = (totalAmount * shares) / totalAbyssShares;
+            if (payout > 0) {
+                try treasury.payoutToken(holder, payout) {
+                    totalDividendsDistributed += payout;
+                    _addDividendRecord(holder, payout, shares, round, pool);
+                    emit DividendDistributed(holder, payout, shares, round, pool);
+                } catch {
+                    emit PayoutFailed(holder, payout, "DIVIDEND");
+                }
+            }
+        }
+    }
+    
     // --- 内部存储辅助函数 ---
 
-    function _addWishRecord(address user, string memory text, uint8 tier, uint256 reward, uint256 round, uint256 holders) internal {
+    function _addWishRecord(address user, string memory text, uint8 tier, uint256 reward, uint256 round, uint256 holders, uint256 pool, uint256 dividend) internal {
         uint256 newId = allWishes.length;
         allWishes.push(WishRecord({
             id: newId,
@@ -446,7 +477,9 @@ contract DreamSeeker is
             round: round,
             tier: tier,
             reward: reward,
-            holdersAtTime: holders
+            holdersAtTime: holders,
+            poolAtTime: pool,
+            dividendAtTime: dividend
         }));
         userWishIds[user].push(newId);
     }
@@ -463,36 +496,63 @@ contract DreamSeeker is
         emit PityTriggered(user, amount, weight);
     }
 
-    // --- 分红领取逻辑 ---
+    function _addDividendRecord(address user, uint256 amount, uint256 shares, uint256 round, uint256 pool) internal {
+        uint256 newId = allDividendRecords.length;
+        allDividendRecords.push(DividendRecord({
+            id: newId,
+            user: user,
+            amount: amount,
+            shares: shares,
+            round: round,
+            pool: pool,
+            timestamp: block.timestamp
+        }));
+        userDividendIds[user].push(newId);
+    }
+    
+    // --- 归墟系统查询 (V2) ---
 
     /**
-     * @notice 查询待领取分红
+     * @notice 获取归墟系统统计信息 (前端查询)
      */
-    function getUnclaimedDividend(address user) public view returns (uint256) {
-        if (!isAbyssHolder[user]) return 0;
-        // 个人份额 = (全局累积 - 用户上次游标)
-        uint256 share = dividendPerShareToken - xDividendPerShareToken[user];
-        // 平分逻辑：这里 share 已经是 "每人应得数额 * 1e18" ? 
-        // 修正逻辑: 
-        // dividendPerShareToken += amount * 1e18 / totalHolders;
-        // User Amount = (new - old) * 1 (因为每人持有1份归墟资格) / 1e18;
-        return share / 1e18;
+    function getAbyssStats() external view returns (
+        uint256 poolBalance,          // 当前奖池 (国库 WISH 余额)
+        uint256 dividendsDistributed, // 累计已发放分红
+        uint256 holderCount,          // 参与分红人数
+        uint256 shares,               // 总归墟份额
+        uint256 abyssCount,           // 归墟已触发次数
+        uint256 winnerRatio,          // 中奖者比例
+        uint256 dividendRatio         // 分红比例
+    ) {
+        poolBalance = IERC20(wishToken).balanceOf(address(treasury));
+        dividendsDistributed = totalDividendsDistributed;
+        holderCount = totalAbyssHolders;
+        shares = totalAbyssShares;
+        abyssCount = totalAbyssTribulations;
+        winnerRatio = abyssWinnerRatio;
+        dividendRatio = abyssDividendRatio;
     }
 
     /**
-     * @notice 领取分红
+     * @notice 获取指定归墟持有者信息
      */
-    function claimDividend() external nonReentrant {
-        uint256 pending = getUnclaimedDividend(msg.sender);
-        require(pending > 0, unicode"无可用分红");
-        
-        // 更新游标
-        xDividendPerShareToken[msg.sender] = dividendPerShareToken;
-        totalDividendsClaimed += pending;
-        
-        // 支付
-        treasury.payoutToken(msg.sender, pending);
-        emit DividendClaimed(msg.sender, pending);
+    function getAbyssHolderInfo(address user) external view returns (
+        bool isHolder,
+        uint256 userShares,
+        uint256 sharePercent  // 份额占比 (basis points, 10000 = 100%)
+    ) {
+        isHolder = isAbyssHolder[user];
+        userShares = userAbyssShares[user];
+        sharePercent = totalAbyssShares > 0
+            ? (userAbyssShares[user] * 10000) / totalAbyssShares
+            : 0;
+    }
+
+    /**
+     * @notice 获取所有归墟持有者列表
+     */
+    function getAbyssHolders() external view returns (address[] memory) {
+        return abyssHolderList;
     }
 
 
@@ -537,6 +597,32 @@ contract DreamSeeker is
      */
     function getUserPityIds(address user) external view returns (uint256[] memory) {
         return userPityIds[user];
+    }
+
+    /**
+     * @notice 获取用户所有分红 ID (用于 BatchReader 遍历)
+     * @param user 用户地址
+     */
+    function getUserDividendIds(address user) external view returns (uint256[] memory) {
+        return userDividendIds[user];
+    }
+
+    /**
+     * @notice 批量获取用户分红 ID (分页查询)
+     * @param user 用户地址
+     * @param start 起始索引
+     * @param count 查询数量
+     */
+    function getUserDividendIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
+        uint256[] storage ids = userDividendIds[user];
+        uint256 total = ids.length;
+        if (start >= total) return new uint256[](0);
+        uint256 end = start + count;
+        if (end > total) end = total;
+        uint256 resultLength = end - start;
+        uint256[] memory result = new uint256[](resultLength);
+        for (uint256 i = 0; i < resultLength; i++) result[i] = ids[start + i];
+        return result;
     }
 
     /**

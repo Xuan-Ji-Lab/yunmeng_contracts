@@ -16,12 +16,25 @@ contract CloudDreamBatchReader {
         uint256 round;
         uint8 tier;
         uint256 reward;
+        uint256 holdersAtTime; // New
+        uint256 poolAtTime;    // New
+        uint256 dividendAtTime;// New
     }
 
     struct PityRecord {
         uint256 id;
         address user;
         uint256 amount;
+        uint256 timestamp;
+    }
+
+    struct DividendRecord {
+        uint256 id;
+        address user;
+        uint256 amount;
+        uint256 shares;
+        uint256 round;
+        uint256 pool;
         uint256 timestamp;
     }
 
@@ -121,15 +134,30 @@ contract CloudDreamBatchReader {
         return result;
     }
 
+    /// @notice 批量获取用户分红 ID（分页）
+    function getUserDividendIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory) {
+        uint256[] memory allIds = ISeeker(seeker).getUserDividendIds(user);
+        uint256 total = allIds.length;
+        
+        if (start >= total) {
+            return new uint256[](0);
+        }
+        
+        uint256 end = start + count;
+        if (end > total) {
+            end = total;
+        }
+        
+        uint256 resultLength = end - start;
+        uint256[] memory result = new uint256[](resultLength);
+        for (uint256 i = 0; i < resultLength; i++) {
+            result[i] = allIds[start + i];
+        }
+        return result;
+    }
+
     /// @notice 批量获取祈愿记录详情
     function getWishRecordsBatch(uint256[] calldata ids) external view returns (WishRecord[] memory) {
-        // 如果 Seeker 提供了 batch getter
-        try ISeeker(seeker).getWishRecordsBatch(ids) returns (WishRecord[] memory records) {
-            return records;
-        } catch {
-            // Fallback
-        }
-
         uint256 len = ids.length;
         WishRecord[] memory result = new WishRecord[](len);
         
@@ -141,9 +169,12 @@ contract CloudDreamBatchReader {
                 uint256 timestamp,
                 uint256 round,
                 uint8 tier,
-                uint256 reward
+                uint256 reward,
+                uint256 holdersAtTime,
+                uint256 poolAtTime,
+                uint256 dividendAtTime
             ) = ISeeker(seeker).allWishes(ids[i]);
-            
+
             result[i] = WishRecord({
                 id: id,
                 user: user,
@@ -151,7 +182,10 @@ contract CloudDreamBatchReader {
                 timestamp: timestamp,
                 round: round,
                 tier: tier,
-                reward: reward
+                reward: reward,
+                holdersAtTime: holdersAtTime,
+                poolAtTime: poolAtTime,
+                dividendAtTime: dividendAtTime
             });
         }
         return result;
@@ -178,6 +212,36 @@ contract CloudDreamBatchReader {
             });
         }
         return result;
+    }
+
+    /// @notice 批量获取分红记录详情
+    function getDividendRecordsBatch(uint256[] calldata ids) external view returns (DividendRecord[] memory) {
+        uint256 len = ids.length;
+        DividendRecord[] memory result = new DividendRecord[](len);
+        
+        for (uint256 i = 0; i < len; i++) {
+            // Fallback: Loop using public getter
+            (
+                uint256 id,
+                address user,
+                uint256 amount,
+                uint256 shares,
+                uint256 round,
+                uint256 pool,
+                uint256 timestamp
+            ) = ISeeker(seeker).allDividendRecords(ids[i]);
+
+            result[i] = DividendRecord({
+                id: id,
+                user: user,
+                amount: amount,
+                shares: shares,
+                round: round,
+                pool: pool,
+                timestamp: timestamp
+            });
+        }
+        return result; 
     }
 
     /// @notice 一次性获取用户所有祈愿数据（适合数量较少时）
@@ -267,11 +331,28 @@ interface IOracle {
 
 // --- 核心合约接口 (Seeker) ---
 interface ISeeker {
+    // Copied from Seeker
+    struct DividendRecord {
+        uint256 id;
+        address user;
+        uint256 amount;
+        uint256 shares;
+        uint256 round;
+        uint256 pool;
+        uint256 timestamp;
+    }
+
     function userWishIds(address user, uint256 index) external view returns (uint256);
     function getUserWishCount(address user) external view returns (uint256);
     function getUserWishIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory);
     
     function getUserPityIds(address user) external view returns (uint256[] memory);
+    function getUserDividendIds(address user) external view returns (uint256[] memory);
+    function getUserDividendIdsBatch(address user, uint256 start, uint256 count) external view returns (uint256[] memory);
+
+    function wishBlockNumbers(uint256 id) external view returns (uint256);
+    function pityBlockNumbers(uint256 id) external view returns (uint256);
+    function dividendBlockNumbers(uint256 id) external view returns (uint256);
     
     function allWishes(uint256 id) external view returns (
         uint256 id_,
@@ -280,7 +361,10 @@ interface ISeeker {
         uint256 timestamp,
         uint256 round,
         uint8 tier,
-        uint256 reward
+        uint256 reward,
+        uint256 holdersAtTime,
+        uint256 poolAtTime,
+        uint256 dividendAtTime
     );
     function getWishRecordsBatch(uint256[] calldata ids) external view returns (CloudDreamBatchReader.WishRecord[] memory);
     
@@ -288,6 +372,17 @@ interface ISeeker {
         uint256 id_,
         address user,
         uint256 amount,
+        uint256 timestamp
+    );
+    
+    // Fallback getter for single record
+    function allDividendRecords(uint256 id) external view returns (
+        uint256 id_,
+        address user,
+        uint256 amount,
+        uint256 shares,
+        uint256 round,
+        uint256 pool,
         uint256 timestamp
     );
 }
