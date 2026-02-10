@@ -306,7 +306,7 @@ contract DreamSeeker is
     }
     
     /**
-     * @dev 内部结果处理逻辑 (抽离以便测试复用)
+     * @dev 内部结果处理逻辑
      */
     function _processResult(address user, string memory wishText, uint256 randomness) internal {
         uint256 rng = randomness % 1000;
