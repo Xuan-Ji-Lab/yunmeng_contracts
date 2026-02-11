@@ -41,7 +41,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
     
     // --- Tax & Ops Variables ---
     address public opsWallet;
-    uint256 public taxOpsBps; // e.g. 5000 = 50%
+    uint256 public taxOpsBps; // DEPRECATED: Kept for storage layout compatibility
     uint256 public minBuybackThreshold; // Auto-buyback threshold
     bool public enableTaxBuyback; // Toggle for auto-buyback
     
@@ -56,7 +56,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
     event FundsReceived(address indexed sender, uint256 amount); // 资金接收事件
     event BuybackFailedBytes(bytes data); // 详细错误数据
     event PortalUpdated(address indexed newPortal);
-    event OpsConfigUpdated(address wallet, uint256 bps);
+    event OpsConfigUpdated(address wallet, uint256 bps); // bps param is deprecated/unused
     event TaxDistributed(uint256 toOps, uint256 toBuyback);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
@@ -84,7 +84,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
         buybackSlippage = 9500; // 默认 5% 滑点
         
         // 默认税收配置
-        taxOpsBps = 5000; // 50% to Ops
+        // taxOpsBps = 5000; // REMOVED
         minBuybackThreshold = 0.05 ether; // 累计到 0.05 BNB 触发回购
         enableTaxBuyback = true; 
     }
@@ -125,7 +125,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
      * @notice 接收 BNB 并发出事件
      * @dev 区分资金来源：
      *      1. Game Contract (Seeker/Drifter): 仅充值，不处理。
-     *      2. Others (Tax): 执行分账 (50% Ops, 50% Buyback)。
+     *      2. Others (Tax): (100% Tax Buyback).
      */
     receive() external payable {
         emit FundsReceived(msg.sender, msg.value);
@@ -149,11 +149,11 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
 
     /**
      * @notice 处理税收分账
-     * @dev Ops 分成立即转出，回购份额累积到 pendingTaxBuyback，
-     *      等自动回购回购。
+     * @dev Ops 分成已移除。回购份额为 100% (若启用)。
+     *      若 Buyback Disabled, 且 OpsWallet 设置了，则转给 OpsWallet (Fallback).
      */
     function _processTaxLossless(uint256 amount) internal {
-        // If buyback is disabled, send 100% to Ops Wallet
+        // If buyback is disabled, send 100% to Ops Wallet as fallback
         if (!enableTaxBuyback) {
             if (opsWallet != address(0)) {
                 (bool success, ) = payable(opsWallet).call{value: amount}("");
@@ -165,22 +165,13 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
             return;
         }
 
-        // --- Enabled: Split + Accumulate ---
+        // --- Enabled: 100% Accumulate for Buyback ---
         
-        // 1. Ops Share (立即转出)
+        // 1. Ops Share (Removed - handled by Flap)
         uint256 opsAmt = 0;
-        if (opsWallet != address(0) && taxOpsBps > 0) {
-            opsAmt = (amount * taxOpsBps) / 10000;
-            if (opsAmt > 0) {
-                (bool success, ) = payable(opsWallet).call{value: opsAmt}("");
-                if (!success) {
-                    emit BuybackFailed("OpsTransferFailed");
-                }
-            }
-        }
         
-        // 2. 回购份额累积
-        uint256 buybackShare = amount - opsAmt;
+        // 2. 回购份额累积 (100%)
+        uint256 buybackShare = amount;
         pendingTaxBuyback += buybackShare;
         emit TaxDistributed(opsAmt, buybackShare);
     }
@@ -363,14 +354,17 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
         core = ICloudDreamCore(_core);
     }
 
-    function setOpsConfig(address _wallet, uint256 _bps, uint256 _threshold, bool _enableBuyback) external {
+    // [MODIFIED] Removed unused `bps` parameter usage. Maintained signature if upgrade requires (but better to cleanup).
+    // Actually, user said "不着急开发" but they approved the plan. I will just simplify parameters.
+    // Ops Wallet is still set here for fallback purposes.
+    function setOpsConfig(address _wallet, uint256 /*_bps*/, uint256 _threshold, bool _enableBuyback) external {
         require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Treasury: unauthorized");
-        require(_bps <= 10000, "Invalid bps");
+        // require(_bps <= 10000, "Invalid bps"); // Removed check
         opsWallet = _wallet;
-        taxOpsBps = _bps;
+        // taxOpsBps = _bps; // Removed assignment
         minBuybackThreshold = _threshold;
         enableTaxBuyback = _enableBuyback;
-        emit OpsConfigUpdated(_wallet, _bps);
+        emit OpsConfigUpdated(_wallet, 0); // Emit 0 for bps
     }
 
     // --- Admin Withdrawal Functions ---

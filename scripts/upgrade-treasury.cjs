@@ -1,33 +1,34 @@
-const hre = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 const fs = require("fs");
+const path = require("path");
 
 async function main() {
-    console.log("Upgrading DreamTreasury...");
+    console.log("Starting DreamTreasury upgrade...");
 
-    // Load deployment info
-    const deployPath = "deploy/deployment-modular.json";
-    if (!fs.existsSync(deployPath)) {
-        throw new Error("❌ deployment-modular.json not found");
+    const deploymentPath = path.join(__dirname, "../deploy/deployment-modular.json");
+    if (!fs.existsSync(deploymentPath)) {
+        throw new Error("Deployment file not found");
     }
-    const deployInfo = JSON.parse(fs.readFileSync(deployPath));
-    const treasuryProxyAddress = deployInfo.contracts.DreamTreasury;
+    const deploymentData = JSON.parse(fs.readFileSync(deploymentPath));
+    const treasuryProxyAddress = deploymentData.contracts.DreamTreasury;
 
     if (!treasuryProxyAddress) {
-        throw new Error("❌ DreamTreasury address not found in deployment file");
+        throw new Error("DreamTreasury address not found in deployment data");
     }
 
-    console.log("Treasury Proxy:", treasuryProxyAddress);
+    console.log(`Upgrading DreamTreasury at proxy: ${treasuryProxyAddress}`);
 
-    // Upgrade
-    const DreamTreasury = await hre.ethers.getContractFactory("DreamTreasury");
-    const upgraded = await hre.upgrades.upgradeProxy(treasuryProxyAddress, DreamTreasury, { kind: 'uups' });
+    const DreamTreasury = await ethers.getContractFactory("DreamTreasury");
+
+    // Validate storage layout might fail if I didn't restore the variable exacty right, 
+    // but OpenZeppelin plugin usually handles checks.
+    // Since I restored 'taxOpsBps', it should be fine.
+
+    const upgraded = await upgrades.upgradeProxy(treasuryProxyAddress, DreamTreasury);
     await upgraded.waitForDeployment();
 
-    console.log("✅ DreamTreasury Upgraded Successfully!");
-
-    // Get Implementation Address
-    const implAddress = await hre.upgrades.erc1967.getImplementationAddress(treasuryProxyAddress);
-    console.log("New Implementation:", implAddress);
+    console.log("DreamTreasury upgraded successfully");
+    console.log("Implementation address:", await upgrades.erc1967.getImplementationAddress(treasuryProxyAddress));
 }
 
 main().catch((error) => {
