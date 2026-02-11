@@ -148,9 +148,9 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
     }
 
     /**
-     * @notice 处理税收分账 (Gas Safe - 搭便车模式)
+     * @notice 处理税收分账
      * @dev Ops 分成立即转出，回购份额累积到 pendingTaxBuyback，
-     *      等下一次 seekTruth 时顺带执行回购。
+     *      等自动回购回购。
      */
     function _processTaxLossless(uint256 amount) internal {
         // If buyback is disabled, send 100% to Ops Wallet
@@ -179,7 +179,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
             }
         }
         
-        // 2. 回购份额累积 (搭便车: 等下一次 seekTruth 触发)
+        // 2. 回购份额累积
         uint256 buybackShare = amount - opsAmt;
         pendingTaxBuyback += buybackShare;
         emit TaxDistributed(opsAmt, buybackShare);
@@ -187,7 +187,7 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
 
     /**
      * @notice 执行累积的税收回购
-     * @dev Seeker 搭便车调用 / OPERATOR 手动调用 / Chainlink Automation 自动调用
+     * @dev Seeker OPERATOR 手动调用 / Chainlink Automation 自动调用
      */
     function executePendingTaxBuyback() public {
         require(
