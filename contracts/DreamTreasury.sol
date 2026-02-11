@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICloudDreamCore.sol"; 
 import "./interfaces/IPancakeRouter02.sol";
 import "./interfaces/IFlapPortal.sol";
+import "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol";
 
 /**
  * @title DreamTreasury (云梦国库 & 资金管理)
@@ -16,7 +17,7 @@ import "./interfaces/IFlapPortal.sol";
  *      3. 代币回购：提供将 BNB 兑换为 WISH 并注入奖池的功能。
  *      安全说明：不包含核心游戏逻辑，只作为"银行"执行经过授权的指令。
  */
-contract DreamTreasury is Initializable, UUPSUpgradeable {
+contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleInterface {
     
     // --- 外部合约引用 ---
     /// @notice 核心配置合约 (用于权限校验)
@@ -29,19 +30,24 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     address public wishToken;
     address public wbnb; // [DEPRECATED] 原 WBNB 地址 (保留名称以兼容存储布局)
     
-    // --- 配置参数 ---
-    /// @notice 是否开启回购功能
-    bool public buybackEnabled;
-    
-    /// @notice 回购比例 (基点)，例如 7000 表示 70% 的收入用于回购
-    uint256 public buybackPercent; 
-    
-    /// @notice 回购滑点保护 (基点)，例如 9500 表示 95% (5%滑点)
-    uint256 public buybackSlippage; 
+    // --- 配置参数 (Removed) ---
+    // Logic moved to Seeker
 
     // --- 新增状态变量 (Storage Gap 之后) ---
+    /// @notice 回购滑点保护 (基点)，例如 9500 表示 95% (5%滑点)
+    uint256 public buybackSlippage; 
     /// @notice Flap Portal 合约地址 (内盘回购)
     address public flapPortal;
+    
+    // --- Tax & Ops Variables ---
+    address public opsWallet;
+    uint256 public taxOpsBps; // e.g. 5000 = 50%
+    uint256 public minBuybackThreshold; // Auto-buyback threshold
+    bool public enableTaxBuyback; // Toggle for auto-buyback
+    
+    // --- Piggyback Buyback ---
+    /// @notice 待回购的税收 BNB 累积金额 (搭便车模式: 在下次寻真时触发)
+    uint256 public pendingTaxBuyback;
 
     // --- 事件定义 ---
     event PayoutExecuted(address indexed to, uint256 amount, string currency); // 支付执行事件 (currency: "BNB" | "WISH")
@@ -50,6 +56,8 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     event FundsReceived(address indexed sender, uint256 amount); // 资金接收事件
     event BuybackFailedBytes(bytes data); // 详细错误数据
     event PortalUpdated(address indexed newPortal);
+    event OpsConfigUpdated(address wallet, uint256 bps);
+    event TaxDistributed(uint256 toOps, uint256 toBuyback);
 
     /// @custom:oz-upgrades-unsafe-allow constructor
     constructor() {
@@ -73,9 +81,12 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
         flapPortal = _flapPortal;
         wishToken = _wishToken;
         
-        buybackEnabled = true;
-        buybackPercent = 7000; // 默认 70%
         buybackSlippage = 9500; // 默认 5% 滑点
+        
+        // 默认税收配置
+        taxOpsBps = 5000; // 50% to Ops
+        minBuybackThreshold = 0.05 ether; // 累计到 0.05 BNB 触发回购
+        enableTaxBuyback = true; 
     }
 
     // --- 鉴权修饰符 (Modifiers) ---
@@ -112,9 +123,116 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
 
     /**
      * @notice 接收 BNB 并发出事件
+     * @dev 区分资金来源：
+     *      1. Game Contract (Seeker/Drifter): 仅充值，不处理。
+     *      2. Others (Tax): 执行分账 (50% Ops, 50% Buyback)。
      */
     receive() external payable {
         emit FundsReceived(msg.sender, msg.value);
+
+        // [Anti-Reentrancy] Ignore refunds/transfers from FlapPortal to prevent buyback loops
+        if (msg.sender == flapPortal) {
+            return;
+        }
+
+        if (msg.value > 0) {
+            address sender = msg.sender;
+            address seeker = core.seeker();
+            address drifter = core.drifter();
+            
+            // 只有非核心合约转账才视为"税收"
+            if (sender != seeker && sender != drifter) {
+                _processTaxLossless(msg.value);
+            }
+        }
+    }
+
+    /**
+     * @notice 处理税收分账 (Gas Safe - 搭便车模式)
+     * @dev Ops 分成立即转出，回购份额累积到 pendingTaxBuyback，
+     *      等下一次 seekTruth 时顺带执行回购。
+     */
+    function _processTaxLossless(uint256 amount) internal {
+        // If buyback is disabled, send 100% to Ops Wallet
+        if (!enableTaxBuyback) {
+            if (opsWallet != address(0)) {
+                (bool success, ) = payable(opsWallet).call{value: amount}("");
+                if (!success) {
+                    emit BuybackFailed("OpsTransferFailed");
+                }
+            }
+            emit TaxDistributed(amount, 0);
+            return;
+        }
+
+        // --- Enabled: Split + Accumulate ---
+        
+        // 1. Ops Share (立即转出)
+        uint256 opsAmt = 0;
+        if (opsWallet != address(0) && taxOpsBps > 0) {
+            opsAmt = (amount * taxOpsBps) / 10000;
+            if (opsAmt > 0) {
+                (bool success, ) = payable(opsWallet).call{value: opsAmt}("");
+                if (!success) {
+                    emit BuybackFailed("OpsTransferFailed");
+                }
+            }
+        }
+        
+        // 2. 回购份额累积 (搭便车: 等下一次 seekTruth 触发)
+        uint256 buybackShare = amount - opsAmt;
+        pendingTaxBuyback += buybackShare;
+        emit TaxDistributed(opsAmt, buybackShare);
+    }
+
+    /**
+     * @notice 执行累积的税收回购
+     * @dev Seeker 搭便车调用 / OPERATOR 手动调用 / Chainlink Automation 自动调用
+     */
+    function executePendingTaxBuyback() public {
+        require(
+            msg.sender == core.seeker() 
+            || core.hasRole(core.OPERATOR_ROLE(), msg.sender)
+            || _isAutomationForwarder(),
+            "Treasury: unauthorized"
+        );
+        uint256 pending = pendingTaxBuyback;
+        if (pending < minBuybackThreshold) return;
+        if (address(this).balance < pending) {
+            pending = address(this).balance;
+        }
+        if (pending == 0) return;
+        
+        pendingTaxBuyback = 0;
+        _internalBuyback(pending);
+    }
+
+    // --- Chainlink Automation ---
+
+    /// @notice Chainlink Automation forwarder 地址 (注册 Upkeep 后设置)
+    address public automationForwarder;
+
+    event AutomationForwarderUpdated(address indexed forwarder);
+
+    function setAutomationForwarder(address _forwarder) external {
+        require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Treasury: config only");
+        automationForwarder = _forwarder;
+        emit AutomationForwarderUpdated(_forwarder);
+    }
+
+    function _isAutomationForwarder() internal view returns (bool) {
+        return automationForwarder != address(0) && msg.sender == automationForwarder;
+    }
+
+    /// @inheritdoc AutomationCompatibleInterface
+    function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory) {
+        upkeepNeeded = pendingTaxBuyback >= minBuybackThreshold 
+                       && address(this).balance > 0;
+    }
+
+    /// @inheritdoc AutomationCompatibleInterface
+    function performUpkeep(bytes calldata) external override {
+        executePendingTaxBuyback();
     }
 
     /**
@@ -156,36 +274,36 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     }
 
     /**
-     * @notice 执行市场回购 (Execute Buyback) - Flap 内盘版
-     * @dev 将持有的 BNB 在 Flap 内盘买入 WISH 代币，用于补充奖池。
-     * @param amount 用于回购的 BNB 数量 (0 表示全部余额)
+     * @notice 执行市场回购 (Execute Buyback) - 100% 回购指定金额
+     * @dev 供 Seeker (70% 资金) 或 TaxSplitter (100% 资金) 调用。
+     *      强制要求 amount > 0，避免误操作消耗所有余额(包括保底储备)。
+     * @param amount 回购金额 (必须 > 0)
      */
     function executeBuyback(uint256 amount) external {
         require(core.hasRole(core.OPERATOR_ROLE(), msg.sender), "Treasury: unauthorized");
+        require(amount > 0, "Treasury: Amount must be > 0");
+        require(address(this).balance >= amount, "Treasury: Insufficient BNB");
         
-        // 如果 amount == 0, 使用合约内所有余额
-        uint256 available = amount;
-        if (amount == 0) {
-            available = address(this).balance;
-        }
-        
-        // 应用回购比例 (例如 70%)
-        uint256 amountToSwap = (available * buybackPercent) / 10000;
-        
-        require(amountToSwap > 0, "Treasury: No funds to buyback");
+        // 执行回购 (100% 金额)
+        _internalBuyback(amount);
+    }
 
-        // Flap Portal Interaction
-        // 构建参数: (tokenIn=0x0, tokenOut=wishToken, amountIn=amountToSwap, minOut=0, data="")
+    function _internalBuyback(uint256 amountToSwap) internal {
+        // [MODIFIED] Removed quote and slippage protection to avoid QuoteFailed on Flap/BondingCurve
+        // 1. Force min output to 0
+        uint256 amountOutMinimum = 0;
+
+        // 2. 构建参数
         IFlapPortal.SwapExactInputParams memory params = IFlapPortal.SwapExactInputParams({
             tokenIn: address(0), // Native BNB
             tokenOut: wishToken,
             amountIn: amountToSwap,
-            amountOutMinimum: 0, // 生产环境应计算滑点
+            amountOutMinimum: amountOutMinimum,
             data: ""
         });
 
-        // 调用 Portal
-        try IFlapPortal(flapPortal).swapExactInput{value: amountToSwap}(params) returns (uint256 amtOut) {
+        // 3. 调用 Portal (显式指定高 gas 限制，避免 63/64 rule 导致 OOG)
+        try IFlapPortal(flapPortal).swapExactInput{value: amountToSwap, gas: 500000}(params) returns (uint256 amtOut) {
             emit BuybackExecuted(amountToSwap, amtOut);
         } catch Error(string memory reason) {
             emit BuybackFailed(reason);
@@ -196,20 +314,19 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
     }
 
     // --- 管理员配置 (Admin Config) ---
-    
+
     /**
-     * @notice 设置回购参数 (需 CONFIG_ROLE)
+     * @notice 设置回购滑点 (需 CONFIG_ROLE)
+     * @param _slippage 滑点 (基点, e.g. 9500 = 95%) 
      */
-    function setConfig(bool _enabled, uint256 _percent, uint256 _slippage) external {
+    function setSlippage(uint256 _slippage) external {
         require(
             core.hasRole(core.CONFIG_ROLE(), msg.sender),
             "Treasury: unauthorized config"
         );
-        buybackEnabled = _enabled;
-        buybackPercent = _percent;
+        require(_slippage <= 10000, "Invalid slippage");
         buybackSlippage = _slippage;
     }
-
     /**
      * @notice 设置 Flap Portal 地址 (需 Admin)
      */
@@ -244,6 +361,16 @@ contract DreamTreasury is Initializable, UUPSUpgradeable {
             "Treasury: only admin"
         );
         core = ICloudDreamCore(_core);
+    }
+
+    function setOpsConfig(address _wallet, uint256 _bps, uint256 _threshold, bool _enableBuyback) external {
+        require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Treasury: unauthorized");
+        require(_bps <= 10000, "Invalid bps");
+        opsWallet = _wallet;
+        taxOpsBps = _bps;
+        minBuybackThreshold = _threshold;
+        enableTaxBuyback = _enableBuyback;
+        emit OpsConfigUpdated(_wallet, _bps);
     }
 
     // --- Admin Withdrawal Functions ---

@@ -6,4 +6,6 @@ interface IDreamTreasury {
     function payoutToken(address to, uint256 amount) external;
     function payoutBNB(address to, uint256 amount) external;
     function executeBuyback(uint256 amountIn) external;
+    function executePendingTaxBuyback() external;
+    function pendingTaxBuyback() external view returns (uint256);
 }

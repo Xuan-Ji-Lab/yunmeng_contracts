@@ -119,9 +119,6 @@ contract DreamSeeker is
     /// @notice 用户保底 ID 索引
     mapping(address => uint256[]) public userPityIds;
 
-    /// @notice 全局分红历史记录
-
-
     // --- VRF 请求状态 ---
     struct RequestStatus {
         bool fulfilled;
@@ -164,6 +161,12 @@ contract DreamSeeker is
 
     /// @notice 分红记录区块号索引
     mapping(uint256 => uint256) public dividendBlockNumbers;
+
+    /// @notice 回购比例 (基点)，例如 7000 表示 70% 的资金用于回购
+    uint256 public buybackPercent; 
+
+    /// @notice 是否开启回购功能
+    bool public buybackEnabled;
 
     // 剩余部分自动留存 Treasury
     
@@ -211,9 +214,10 @@ contract DreamSeeker is
         tierThresholds = [1, 11, 41, 141]; // 0.1%, 1%, 3%, 10%
         
         abyssWinnerRatio = 50;   // 50%
+        abyssWinnerRatio = 50;   // 50%
         abyssDividendRatio = 30; // 30%
-        
-
+        buybackPercent = 7000;   // 70%
+        buybackEnabled = true;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override {
@@ -241,8 +245,15 @@ contract DreamSeeker is
             (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
             require(success, unicode"Treasury转账失败");
             
-            // 尝试触发 Treasury 的回购逻辑 (静默失败，不影响主流程)
-            try treasury.executeBuyback(msg.value) {} catch {}
+            // 触发 Treasury 回购逻辑 (按配置比例)
+            if (buybackEnabled) {
+                // 计算回购金额: msg.value * buybackPercent / 10000
+                uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
+                
+                if (buybackAmt > 0) {
+                    try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
+                }
+            }
             emit FundsForwarded(msg.sender, msg.value);
         } else {
             // 免费模式: 必须消耗福报 (跨合约调用 Drifter)
@@ -271,7 +282,13 @@ contract DreamSeeker is
             (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
             require(success, unicode"Treasury转账失败");
             
-            try treasury.executeBuyback(msg.value) {} catch {}
+            // 触发 Treasury 回购逻辑 (按配置比例)
+            if (buybackEnabled) {
+                uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
+                if (buybackAmt > 0) {
+                    try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
+                }
+            }
             emit FundsForwarded(msg.sender, msg.value);
         } else {
             // 免费模式
@@ -689,7 +706,20 @@ contract DreamSeeker is
     function setTierThresholds(uint16[4] calldata _thresholds) external {
         require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Seeker: unauthorized");
         // Simple Update
+        // Simple Update
         tierThresholds = _thresholds;
+    }
+
+    /**
+     * @notice 设置回购比例 (需 CONFIG_ROLE)
+     * @param _enabled 是否开启
+     * @param _percent 回购比例 (基点, e.g. 7000 = 70%)
+     */
+    function setBuybackConfig(bool _enabled, uint256 _percent, uint256 _slippage) external {
+        require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Seeker: unauthorized");
+        require(_percent <= 10000, "Invalid percent");
+        buybackEnabled = _enabled;
+        buybackPercent = _percent;
     }
 
     // --- VRF 超时退款 (Stale Request Refund) ---
