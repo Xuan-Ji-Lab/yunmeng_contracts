@@ -1,37 +1,31 @@
 const { ethers, upgrades } = require("hardhat");
-const fs = require("fs");
-const path = require("path");
 
 async function main() {
-    console.log("Starting DreamTreasury upgrade...");
+    const proxyAddress = "0x4BA7ACf83AF75657c0Cdaa66310499CAf2775d8F"; // From previous verification logs step 549/552: "Treasury Address: 0x4BA..."
+    console.log(`Upgrading DreamTreasury at: ${proxyAddress}`);
 
-    const deploymentPath = path.join(__dirname, "../deploy/deployment-modular.json");
-    if (!fs.existsSync(deploymentPath)) {
-        throw new Error("Deployment file not found");
-    }
-    const deploymentData = JSON.parse(fs.readFileSync(deploymentPath));
-    const treasuryProxyAddress = deploymentData.contracts.DreamTreasury;
-
-    if (!treasuryProxyAddress) {
-        throw new Error("DreamTreasury address not found in deployment data");
-    }
-
-    console.log(`Upgrading DreamTreasury at proxy: ${treasuryProxyAddress}`);
-
+    // 1. Get Factory
     const DreamTreasury = await ethers.getContractFactory("DreamTreasury");
 
-    // Validate storage layout might fail if I didn't restore the variable exacty right, 
-    // but OpenZeppelin plugin usually handles checks.
-    // Since I restored 'taxOpsBps', it should be fine.
+    // 2. Validate Upgrade (Optional but good)
+    // await upgrades.forceImport(proxyAddress, DreamTreasury); // If needed
 
-    const upgraded = await upgrades.upgradeProxy(treasuryProxyAddress, DreamTreasury);
+    // 3. Upgrade
+    console.log("Proposing upgrade...");
+    const upgraded = await upgrades.upgradeProxy(proxyAddress, DreamTreasury, {
+        unsafeAllow: ['constructor']
+    });
+
+    console.log("Upgrade transaction sent. Waiting...");
     await upgraded.waitForDeployment();
 
-    console.log("DreamTreasury upgraded successfully");
-    console.log("Implementation address:", await upgrades.erc1967.getImplementationAddress(treasuryProxyAddress));
+    console.log("DreamTreasury upgraded successfully!");
+    console.log("Implementation Address:", await upgrades.erc1967.getImplementationAddress(proxyAddress));
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exitCode = 1;
-});
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });

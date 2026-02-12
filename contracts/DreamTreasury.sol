@@ -259,7 +259,8 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
         if (amount == 0) return;
         
         require(address(this).balance >= amount, unicode"Treasury: BNB 余额不足");
-        (bool success, ) = payable(to).call{value: amount}("");
+        // Limit gas to 20,000 to prevent gas starvation (63/64 rule) if 'to' is a contract
+        (bool success, ) = payable(to).call{value: amount, gas: 20000}("");
         require(success, unicode"Treasury: BNB 转账失败");
         
         emit PayoutExecuted(to, amount, "BNB");

@@ -1,112 +1,83 @@
-const hre = require("hardhat");
-const fs = require("fs");
+const { ethers, network } = require("hardhat");
 
 async function main() {
-    console.log("Simulating VRF Callback on Mainnet Fork...");
+    const seekerAddress = "0x72AE4f0Ac240b3501Ebe61cC3AB807Eca435E2Cf";
+    const vrfCoordinatorAddress = "0xc587d9053cd1118f25F645F9E08BB98c9712A4EE";
+    const treasuryAddress = "0x4386703277717804470a1e05a109855521b764c6"; // Found from previous deployment or check
+    const requestId = "0x6d63349d493355792298c46782dd421a96d3901c47b88def07b0d685ef01424b";
 
-    // 0. Fork Mainnet Explicitly with specific RPC
-    // Trying LlamaRPC which is often good for archival/forking
-    const MAINNET_RPC = "https://binance.llamarpc.com";
+    console.log("--- Simulating VRF Callback on Mainnet Fork (Low Level) ---");
 
-    console.log(`Resetting network to fork ${MAINNET_RPC}...`);
-    await hre.network.provider.request({
-        method: "hardhat_reset",
-        params: [
-            {
-                forking: {
-                    jsonRpcUrl: MAINNET_RPC,
-                },
-            },
-        ],
-    });
-    console.log("Fork ready.");
-
-    // 1. Setup Config
-    const deployPath = "deploy/deployment-modular.json";
-    if (!fs.existsSync(deployPath)) {
-        throw new Error("Deployment file not found at " + deployPath);
-    }
-    const info = JSON.parse(fs.readFileSync(deployPath));
-    const seekerAddress = info.contracts.DreamSeeker;
-    const coordinatorAddress = info.config.vrfCoordinator;
-
-    // The Request ID from previous check
-    const REQUEST_ID = "114435887916774903688075172810410046366555938025920826054281412160318151721872";
-
-    console.log(`Seeker: ${seekerAddress}`);
-    console.log(`Coordinator: ${coordinatorAddress}`);
-    console.log(`Request ID: ${REQUEST_ID}`);
-
-    // 2. Impersonate Coordinator
-    await hre.network.provider.request({
+    // 1. Impersonate VRF Coordinator (Low Level)
+    await network.provider.request({
         method: "hardhat_impersonateAccount",
-        params: [coordinatorAddress],
+        params: [vrfCoordinatorAddress],
     });
+    const coordinatorSigner = await ethers.getSigner(vrfCoordinatorAddress);
 
-    // Fund the coordinator so it can send txs
-    await hre.network.provider.send("hardhat_setBalance", [
-        coordinatorAddress,
-        "0x1000000000000000000", // 1 ETH
+    // Fund the coordinator
+    await network.provider.send("hardhat_setBalance", [
+        vrfCoordinatorAddress,
+        "0x8AC7230489E80000", // 10 ETH
     ]);
 
-    const coordinatorSigner = await hre.ethers.getSigner(coordinatorAddress);
+    // 2. Fund Treasury (Just in case Pity payout fails due to low balance, though it should be caught)
+    // Let's check Treasury Balance first
+    const treasuryBal = await ethers.provider.getBalance(treasuryAddress);
+    console.log(`Treasury Balance: ${ethers.formatEther(treasuryBal)} BNB`);
 
     // 3. Attach Seeker
-    const DreamSeeker = await hre.ethers.getContractFactory("DreamSeeker");
+    const DreamSeeker = await ethers.getContractFactory("DreamSeeker");
     const seeker = DreamSeeker.attach(seekerAddress).connect(coordinatorSigner);
 
-    // 4. Prepare Random Words
-    // Check if request exists
-    const reqStatus = await seeker.s_requests(REQUEST_ID);
-    console.log(`Request Exists: ${reqStatus.exists}`);
-    console.log(`Batch Size: ${reqStatus.batchSize}`);
+    // 4. Prepare Dummy Random Words to trigger Pity (Normal Tier)
+    // Tier 4 (Normal) triggers Pity increment.
+    // 200 % 1000 = 200 > 141 => Tier 4.
+    const randomWords = [200];
 
-    if (!reqStatus.exists) {
-        console.error("Request not found in this fork! Ensure the RPC node is synced.");
-        return;
-    }
-
-    const randomWords = [];
-    // Just generate some deterministic random words for testing
-    for (let i = 0; i < reqStatus.batchSize; i++) {
-        const randomWord = hre.ethers.hexlify(hre.ethers.randomBytes(32));
-        randomWords.push(randomWord);
-    }
-
-    console.log(`Generated ${randomWords.length} random words.`);
-
-    // 5. Simulate Call
     console.log("Calling rawFulfillRandomWords...");
+
     try {
-        // rawFulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
-        const tx = await seeker.rawFulfillRandomWords(REQUEST_ID, randomWords, {
-            gasLimit: 3000000 // Give it plenty of gas to succeed if logic is correct
+        const tx = await seeker.rawFulfillRandomWords(requestId, randomWords, {
+            gasLimit: 2000000 // Match config
         });
+        console.log("Transaction sent. Hash:", tx.hash);
 
-        console.log(`Tx sent: ${tx.hash}`);
         const receipt = await tx.wait();
-        console.log(`✅ Simulation Successful! Gas Used: ${receipt.gasUsed.toString()}`);
+        console.log("Transaction Success! status:", receipt.status);
+        console.log("Gas Used:", receipt.gasUsed.toString());
 
-        // Find events
+        // Check logs to see if PityTriggered or PayoutFailed
         for (const log of receipt.logs) {
             try {
+                // Simple check if it's our event
                 const parsed = seeker.interface.parseLog(log);
-                if (parsed.name === "SeekResult") {
-                    console.log(`Saved Wish: ${parsed.args.wishText} | Tier: ${parsed.args.tier}`);
+                console.log(`Event: ${parsed.name}`);
+                if (parsed.name === 'PityTriggered') {
+                    console.log(">> PITY TRIGGERED SUCCESS <<");
+                    console.log("Amount:", ethers.formatEther(parsed.args.amount));
+                }
+                if (parsed.name === 'PayoutFailed') {
+                    console.log(">> PAYOUT FAILED <<");
+                    console.log("Reason:", parsed.args.reason);
                 }
             } catch (e) { }
         }
-    } catch (error) {
-        console.error("❌ Simulation FAILED!");
-        if (error.data) {
-            console.error(`Revert Data: ${error.data}`);
-        }
-        // Try to decode error
-        try {
-            // Replay with call static to get revert string
-            await seeker.rawFulfillRandomWords.staticCall(REQUEST_ID, randomWords, { gasLimit: 3000000 });
-        } catch (staticError) {
-            console.error("Static Call Revert Reason:", staticError.reason || staticError.message);
+
+    } catch (e) {
+        console.error("\n!!! TRANSACTION REVERTED !!!");
+
+        if (e.data) {
+            console.error("Revert Data:", e.data);
+            // Try to decode PayoutFailed/Error
+            try {
+                const decoded = seeker.interface.parseError(e.data);
+                console.error("Decoded Error:", decoded);
+            } catch (decErr) {
+                console.error("Could not decode error");
+            }
+        } else {
+            console.error("Error Message:", e.message);
         }
     }
 }

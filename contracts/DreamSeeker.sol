@@ -170,6 +170,11 @@ contract DreamSeeker is
 
     // 剩余部分自动留存 Treasury
     
+    // --- New Storage V2 (Free Wish Limit) ---
+    uint256 public freeWishDailyLimit;
+    mapping(address => uint256) public userDailyFreeWishCount;
+    mapping(address => uint256) public lastFreeWishDay;
+    
     // --- 事件 ---
     event SeekRequestSent(uint256 indexed requestId, address indexed user);
     event SeekResult(address indexed user, uint8 tier, uint256 reward, string wishText);
@@ -237,30 +242,26 @@ contract DreamSeeker is
      * @param wishText 祈愿文本
      */
     function seekTruth(string memory wishText) external payable nonReentrant {
-        if (msg.value >= seekCost) {
-            // 付费模式
-            hasPaid[msg.sender] = true;
+        // 强制付费
+        require(msg.value >= seekCost, unicode"福报祈愿维护中，请使用BNB");
+
+        // 付费模式
+        hasPaid[msg.sender] = true;
+        
+        // 付费模式: 资金转发给 Treasury (使用 call 避免 2300 gas 限制)
+        (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
+        require(success, unicode"Treasury转账失败");
+        
+        // 触发 Treasury 回购逻辑 (按配置比例)
+        if (buybackEnabled) {
+            // 计算回购金额: msg.value * buybackPercent / 10000
+            uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
             
-            // 付费模式: 资金转发给 Treasury (使用 call 避免 2300 gas 限制)
-            (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
-            require(success, unicode"Treasury转账失败");
-            
-            // 触发 Treasury 回购逻辑 (按配置比例)
-            if (buybackEnabled) {
-                // 计算回购金额: msg.value * buybackPercent / 10000
-                uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
-                
-                if (buybackAmt > 0) {
-                    try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
-                }
+            if (buybackAmt > 0) {
+                try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
             }
-            emit FundsForwarded(msg.sender, msg.value);
-        } else {
-            // 免费模式: 必须消耗福报 (跨合约调用 Drifter)
-            require(msg.value == 0, unicode"金额不足");
-            // 调用 Drifter 扣除福报 (如余额不足 Drifter 会 Revert)
-            drifter.burnKarma(msg.sender, karmaCost);
         }
+        emit FundsForwarded(msg.sender, msg.value);
 
         requestRandomWords(wishText, msg.value > 0, 1);
     }
@@ -273,28 +274,23 @@ contract DreamSeeker is
     function seekTruthBatch(string memory wishText, uint256 count) external payable nonReentrant {
         require(count > 0 && count <= 10, "Invalid count");
         
-        if (msg.value > 0) {
-            // 付费模式
-            uint256 totalCost = seekCost * count;
-            require(msg.value >= totalCost, unicode"金额不足");
-            
-            hasPaid[msg.sender] = true;
-            (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
-            require(success, unicode"Treasury转账失败");
-            
-            // 触发 Treasury 回购逻辑 (按配置比例)
-            if (buybackEnabled) {
-                uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
-                if (buybackAmt > 0) {
-                    try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
-                }
+        // 强制付费
+        uint256 totalCost = seekCost * count;
+        require(msg.value >= totalCost, unicode"福报祈愿维护中，请使用BNB");
+
+        // 付费模式
+        hasPaid[msg.sender] = true;
+        (bool success, ) = payable(address(treasury)).call{value: msg.value}("");
+        require(success, unicode"Treasury转账失败");
+        
+        // 触发 Treasury 回购逻辑 (按配置比例)
+        if (buybackEnabled) {
+            uint256 buybackAmt = (msg.value * buybackPercent) / 10000;
+            if (buybackAmt > 0) {
+                try treasury.executeBuyback{gas: 300000}(buybackAmt) {} catch {}
             }
-            emit FundsForwarded(msg.sender, msg.value);
-        } else {
-            // 免费模式
-            require(msg.value == 0, unicode"金额不足");
-            drifter.burnKarma(msg.sender, karmaCost * count);
         }
+        emit FundsForwarded(msg.sender, msg.value);
 
         requestRandomWords(wishText, msg.value > 0, uint32(count));
     }
@@ -729,6 +725,28 @@ contract DreamSeeker is
         require(_percent <= 10000, "Invalid percent");
         buybackEnabled = _enabled;
         buybackPercent = _percent;
+    }
+
+    /**
+     * @notice 设置免费祈愿每日上限 (需 CONFIG_ROLE)
+     * @param _limit 每日次数上限
+     */
+    function setFreeWishConfig(uint256 _limit) external {
+        require(core.hasRole(core.CONFIG_ROLE(), msg.sender), "Seeker: unauthorized");
+        freeWishDailyLimit = _limit;
+    }
+
+    /**
+     * @dev 内部函数：检查并更新每日免费次数
+     */
+    function _checkAndIncrementFreeWish(address user, uint256 count) internal {
+        uint256 today = block.timestamp / 1 days;
+        if (lastFreeWishDay[user] != today) {
+            lastFreeWishDay[user] = today;
+            userDailyFreeWishCount[user] = 0;
+        }
+        require(userDailyFreeWishCount[user] + count <= freeWishDailyLimit, unicode"今日免费次数用尽");
+        userDailyFreeWishCount[user] += count;
     }
 
     // --- VRF 超时退款 (Stale Request Refund) ---
