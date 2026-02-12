@@ -1,0 +1,19 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+Checking status for TX: 0xf59d0278a2fbad64ec1c7cf4938cc47c49d9cc30606ff1841a751ac192b20c9d
+Status: Success
+Found Request ID: 49415685719667612467501729567461765110364254354167181809044323477736378020845
+Checking request status in DreamSeeker...
+Request Exists: true
+Request Fulfilled: false
+Result: PENDING (VRF callback not yet processed)
+Current VRF Callback Gas Limit: 1000000
+
+Checking VRF Coordinator Logs...
+
+Verified VRF Request Events:
+Key Hash: 0x130dcfd3d4b68aeabe942a0468307db43c1fc606b52c03bb8006d042ba36c01e
+Sub ID: 1067
+Callback Gas Limit: 1000000
+Num Words: 1
+Sender: 0x72AE4f0Ac240b3501Ebe61cC3AB807Eca435E2Cf

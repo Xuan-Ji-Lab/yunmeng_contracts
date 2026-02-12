@@ -1,0 +1,20 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+Checking status for TX: 0xcd46a934a1c6dd643f62adff3da0b16ea543ae0d0085ef2867aa3c90275dac36
+Status: Success
+Found Request ID: 47903190278797915101399444548476706413763493545215989894965165053361290578053
+Checking request status in DreamSeeker...
+Request Exists: true
+Request Fulfilled: false
+Result: PENDING (VRF callback not yet processed)
+Current VRF Callback Gas Limit: 1000000
+
+Checking VRF Coordinator Logs...
+
+Verified VRF Request Events:
+Key Hash: 0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314
+Sub ID: 1067
+Callback Gas Limit: 1000000
+Num Words: 1
+Sender: 0x72AE4f0Ac240b3501Ebe61cC3AB807Eca435E2Cf
+Key Hash: 200 gwei lane (Standard)

@@ -18,7 +18,7 @@ module.exports = {
         hardhat: {
             chainId: 1337,
             forking: {
-                url: "https://data-seed-prebsc-2-s3.binance.org:8545/",
+                url: "https://bsc-dataseed3.binance.org/",
             }
         },
         bscTestnet: {
@@ -28,7 +28,14 @@ module.exports = {
                 ? [`0x${process.env.DEPLOYER_PRIVATE_KEY.replace(/^0x/, '')}`]
                 : [],
             gasPrice: 5000000000, // 5 gwei
+        },
+        bscMainnet: {
+            url: "https://bsc-dataseed.binance.org/",
+            chainId: 56,
+            accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+            gasPrice: 5000000000, // 5 gwei 
         }
+
     },
     etherscan: {
         apiKey: process.env.BSCSCAN_API_KEY,

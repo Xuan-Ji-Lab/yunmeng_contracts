@@ -1,6 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("@openzeppelin/hardhat-upgrades");
-require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -9,17 +8,15 @@ module.exports = {
         settings: {
             optimizer: {
                 enabled: true,
-                runs: 1
-            }
+                runs: 200,
+            },
+            viaIR: true,
         }
     },
     networks: {
         hardhat: {
             chainId: 1337,
-            // NO FORKING
+            // No forking!
         }
-    },
-    etherscan: {
-        apiKey: process.env.BSCSCAN_API_KEY
-    },
+    }
 };

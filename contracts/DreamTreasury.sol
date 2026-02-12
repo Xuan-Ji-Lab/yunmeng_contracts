@@ -139,9 +139,10 @@ contract DreamTreasury is Initializable, UUPSUpgradeable, AutomationCompatibleIn
             address sender = msg.sender;
             address seeker = core.seeker();
             address drifter = core.drifter();
-            
-            // 只有非核心合约转账才视为"税收"
-            if (sender != seeker && sender != drifter) {
+            address oracle = core.oracle();
+
+            // 只有非核心合约转账才视为"税收" (Exclude Seeker, Drifter, AND Oracle)
+            if (sender != seeker && sender != drifter && sender != oracle) {
                 _processTaxLossless(msg.value);
             }
         }

@@ -1,0 +1,21 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+Checking status for TX: 0x275bc58c8441124e07ad7c436c4bf4fa7d2eec7000e729b0c157dfd7eecb97c0
+Status: Success
+Found Request ID: 50883377444474521854583251967635731675232559225624414023386613309489685341950
+Checking request status in DreamSeeker...
+Request Exists: true
+Request Fulfilled: false
+Result: PENDING (VRF callback not yet processed)
+Current VRF Callback Gas Limit: 2500000
+
+Checking VRF Coordinator Logs...
+
+Verified VRF Request Events:
+Key Hash: 0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314
+Sub ID: 1067
+Callback Gas Limit: 2500000
+Num Words: 1
+Sender: 0x72AE4f0Ac240b3501Ebe61cC3AB807Eca435E2Cf
+✅ Gas Limit is correct (2,500,000).
+Key Hash: 200 gwei lane (Standard)

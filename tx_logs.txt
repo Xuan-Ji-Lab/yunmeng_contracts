@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (3) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+Checking status for TX: 0x448b115c2f4b8a5c36def92fb66e0036eb6ba4b9519c2caf265a316d94f5d62b
+Status: Success
+Found Request ID: 71870962276077755231360998808830323066429649609464751118466441608422207994443
+Checking request status in DreamSeeker...
+Request Exists: true
+Request Fulfilled: false
+Result: PENDING (VRF callback not yet processed)
+Current VRF Callback Gas Limit: 2500000

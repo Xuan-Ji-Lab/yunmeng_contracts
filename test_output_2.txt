@@ -1,0 +1,84 @@
+TypeError: Contract "MockCore" should be marked as abstract.
+  --> contracts/mocks/Mocks.sol:10:1:
+   |
+10 | contract MockCore is ICloudDreamCore {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+Note: Missing implementation: 
+  --> contracts/interfaces/ICloudDreamCore.sol:23:5:
+   |
+23 |     function OPERATOR_ROLE() external view returns (bytes32);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/ICloudDreamCore.sol:8:5:
+  |
+8 |     function drifter() external view returns (address);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/ICloudDreamCore.sol:9:5:
+  |
+9 |     function oracle() external view returns (address);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+  --> contracts/interfaces/ICloudDreamCore.sol:11:5:
+   |
+11 |     function protocolFeeRate() external view returns (uint256);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+  --> contracts/interfaces/ICloudDreamCore.sol:12:5:
+   |
+12 |     function protocolFeeRecipient() external view returns (address);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/ICloudDreamCore.sol:7:5:
+  |
+7 |     function seeker() external view returns (address);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/ICloudDreamCore.sol:6:5:
+  |
+6 |     function treasury() external view returns (address);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+TypeError: Contract "MockTreasury" should be marked as abstract.
+  --> contracts/mocks/Mocks.sol:31:1:
+   |
+31 | contract MockTreasury is IDreamTreasury {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+Note: Missing implementation: 
+ --> contracts/interfaces/IDreamTreasury.sol:9:5:
+  |
+9 |     function executePendingTaxBuyback() external;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+  --> contracts/interfaces/IDreamTreasury.sol:10:5:
+   |
+10 |     function pendingTaxBuyback() external view returns (uint256);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/IDreamTreasury.sol:5:5:
+  |
+5 |     function wishToken() external view returns (address);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+TypeError: Contract "MockDrifter" should be marked as abstract.
+  --> contracts/mocks/Mocks.sol:38:1:
+   |
+38 | contract MockDrifter is IDreamDrifter {
+   | ^ (Relevant source part starts here and spans across multiple lines).
+Note: Missing implementation: 
+ --> contracts/interfaces/IDreamDrifter.sol:7:5:
+  |
+7 |     function getKarma(address user) external view returns (uint256);
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Note: Missing implementation: 
+ --> contracts/interfaces/IDreamDrifter.sol:6:5:
+  |
+6 |     function mintKarma(address user, uint256 amount) external;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Error HH600: Compilation failed
+
+For more info go to https://v2.hardhat.org/HH600 or run Hardhat with --show-stack-traces

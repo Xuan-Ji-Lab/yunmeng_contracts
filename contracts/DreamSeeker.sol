@@ -348,7 +348,7 @@ contract DreamSeeker is
         
         // 循环处理每一个随机数
         for (uint256 i = 0; i < randomWords.length; i++) {
-            _processResult(request.sender, request.wishText, randomWords[i]);
+            _processResult(request.sender, request.wishText, randomWords[i], request.isPaid);
         }
         
         delete s_requests[requestId];
@@ -357,7 +357,7 @@ contract DreamSeeker is
     /**
      * @dev 内部结果处理逻辑
      */
-    function _processResult(address user, string memory wishText, uint256 randomness) internal {
+    function _processResult(address user, string memory wishText, uint256 randomness, bool isPaid) internal {
         uint256 rng = randomness % 1000;
         uint8 tier;
         uint256 reward = 0;
@@ -420,32 +420,41 @@ contract DreamSeeker is
             }
         } else {
             // === 未中归墟 (Normal) ===
-            tribCount++; // 增加劫数
-            uint256 weightAdded = 0;
             
             // 判定等级
-             if (rng < tierThresholds[1]) { tier = 1; weightAdded = 10; }
-            else if (rng < tierThresholds[2]) { tier = 2; weightAdded = 5; }
-            else if (rng < tierThresholds[3]) { tier = 3; weightAdded = 2; }
-            else { tier = 4; weightAdded = 1; }
+             if (rng < tierThresholds[1]) { tier = 1; }
+            else if (rng < tierThresholds[2]) { tier = 2; }
+            else if (rng < tierThresholds[3]) { tier = 3; }
+            else { tier = 4; }
             
-            userTribulationWeight[user] += weightAdded;
-            
-            // 保底判定 (Pity Check)
-            if (tribCount >= pityThreshold) {
-                // 触发保底: 发放 BNB 奖励
-                uint256 pityReward = userTribulationWeight[user] * pityBase;
-                uint256 weightToEmit = userTribulationWeight[user]; // 保存权重用于事件
+            // 只有付费用户才参与劫数累计和保底
+            if (isPaid) {
+                tribCount++; // 增加劫数
+                uint256 weightAdded = 0;
+
+                if (tier == 1) weightAdded = 10;
+                else if (tier == 2) weightAdded = 5;
+                else if (tier == 3) weightAdded = 2;
+                else weightAdded = 1; // Tier 4
                 
-                // VRF 安全: 使用 try-catch 防止支付失败导致回调 revert
-                try treasury.payoutBNB(user, pityReward) {
-                } catch {
-                    emit PayoutFailed(user, pityReward, "PITY_BNB");
+                userTribulationWeight[user] += weightAdded;
+                
+                // 保底判定 (Pity Check)
+                if (tribCount >= pityThreshold) {
+                    // 触发保底: 发放 BNB 奖励
+                    uint256 pityReward = userTribulationWeight[user] * pityBase;
+                    uint256 weightToEmit = userTribulationWeight[user]; // 保存权重用于事件
+                    
+                    // VRF 安全: 使用 try-catch 防止支付失败导致回调 revert
+                    try treasury.payoutBNB(user, pityReward) {
+                    } catch {
+                        emit PayoutFailed(user, pityReward, "PITY_BNB");
+                    }
+                    _addPityRecord(user, pityReward, weightToEmit);
+                    
+                    tribCount = 0;
+                    userTribulationWeight[user] = 0;
                 }
-                _addPityRecord(user, pityReward, weightToEmit);
-                
-                tribCount = 0;
-                userTribulationWeight[user] = 0;
             }
         }
         

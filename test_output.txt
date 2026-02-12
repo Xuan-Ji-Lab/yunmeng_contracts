@@ -1,0 +1,38 @@
+
+
+  DreamSeeker Gas Simulation (Local)
+    1) "before each" hook for "Should measure gas for Standard Wish (No Abyss)"
+
+
+  0 passing (436ms)
+  1 failing
+
+  1) DreamSeeker Gas Simulation (Local)
+       "before each" hook for "Should measure gas for Standard Wish (No Abyss)":
+     HardhatError: HH700: Artifact for contract "MockCore" not found. 
+      at Artifacts._handleWrongArtifactForContractName (/Users/admin/Desktop/开发/抽签/ethereal-contracts/node_modules/hardhat/src/internal/artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (/Users/admin/Desktop/开发/抽签/ethereal-contracts/node_modules/hardhat/src/internal/artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (/Users/admin/Desktop/开发/抽签/ethereal-contracts/node_modules/hardhat/src/internal/artifacts.ts:516:21)
+      at Artifacts.readArtifact (/Users/admin/Desktop/开发/抽签/ethereal-contracts/node_modules/hardhat/src/internal/artifacts.ts:71:26)
+      at getContractFactory (/Users/admin/Desktop/开发/抽签/ethereal-contracts/node_modules/@nomicfoundation/hardhat-ethers/src/internal/helpers.ts:120:22)
+      at Context.<anonymous> (/Users/admin/Desktop/开发/抽签/ethereal-contracts/test/simulation.js:13:26)
+
+
+
+·············································································································
+|  [32m[1mSolidity and Network Configuration[22m[39m                                                                       │
+························|·················|················|·················|·······························
+|  [36mSolidity: 0.8.22[39m     ·  [36mOptim: true[39m    ·  [36mRuns: 200[39m     ·  [36mviaIR: true[39m    ·    [36mBlock: 60,000,000 gas[39m     │
+························|·················|················|·················|·······························
+|  [32m[1mMethods[22m[39m                                                                                                  │
+························|·················|················|·················|··············|················
+|  [32m[1mContracts / Methods[22m[39m  ·  [1mMin[22m            ·  [1mMax[22m           ·  [1mAvg[22m            ·  [1m# calls[22m     ·  [1musd (avg)[22m    │
+························|·················|················|·················|··············|················
+|  [32m[1mKey[22m[39m                                                                                                      │
+·············································································································
+|  [35m[1m◯[22m[39m  Execution gas for this method does not include intrinsic gas overhead                                 │
+·············································································································
+|  [35m[1m△[22m[39m  Cost was non-zero but below the precision setting for the currency display (see options)              │
+·············································································································
+|  [35mToolchain:[39m  hardhat                                                                                      │
+·············································································································
