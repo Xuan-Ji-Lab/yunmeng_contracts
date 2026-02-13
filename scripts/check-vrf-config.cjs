@@ -2,32 +2,44 @@ const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-    console.log("Checking VRF Configuration...");
+    console.log("正在检查 CloudDreamCore 的 VRF 配置...");
 
-    // 1. Get Deployments
-    const deployPath = "deploy/deployment-modular.json";
-    const info = JSON.parse(fs.readFileSync(deployPath));
-    const coreAddress = info.contracts.CloudDreamCore;
+    const network = hre.network.name;
+    const deployInfoPath = `deploy/deployment-modular.json`;
 
-    // 2. Attach Core
-    const CloudDreamCore = await hre.ethers.getContractFactory("CloudDreamCore");
-    const core = CloudDreamCore.attach(coreAddress);
+    let deployInfo;
+    if (fs.existsSync(`deploy/deployment-${network}.json`)) {
+        deployInfo = JSON.parse(fs.readFileSync(`deploy/deployment-${network}.json`));
+    } else if (fs.existsSync(deployInfoPath)) {
+        deployInfo = JSON.parse(fs.readFileSync(deployInfoPath));
+    } else {
+        throw new Error("Deployment info not found");
+    }
 
-    // 3. Get Config
-    const keyHash = await core.vrfKeyHash();
-    const subId = await core.vrfSubscriptionId();
-    const gasLimit = await core.vrfCallbackGasLimit();
-    const confs = await core.vrfRequestConfirmations();
+    const coreAddr = deployInfo.contracts.CloudDreamCore;
+    const core = await hre.ethers.getContractAt("ICloudDreamCore", coreAddr);
 
-    console.log(`Key Hash: ${keyHash}`);
-    console.log(`Subscription ID: ${subId}`);
-    console.log(`Callback Gas Limit: ${gasLimit}`);
-    console.log(`Confirmations: ${confs}`);
+    console.log("Core Address:", coreAddr);
 
-    // Known BSC Mainnet Hash (200 gwei)
-    // https://docs.chain.link/vrf/v2/subscription/supported-networks#bnb-chain-mainnet
-    const KNOWN_HASH = "0xd4bb89654db74673a187bd804519e65e3f71a52bc55f11da7601a13dcf505314"; // 200 gwei (standard)
-    // 0xba9e7e78e1215c0e12798f98a3c5a363... is also a hash? No, let's verify.
+    try {
+        const limit = await core.vrfCallbackGasLimit();
+        console.log("Current VRF Callback Gas Limit:", limit.toString());
+
+        const subId = await core.vrfSubscriptionId();
+        console.log("VRF Subscription ID:", subId.toString());
+
+        const requestConfirmations = await core.vrfRequestConfirmations();
+        console.log("Request Confirmations:", requestConfirmations.toString());
+
+        const keyHash = await core.vrfKeyHash();
+        console.log("Key Hash:", keyHash);
+
+    } catch (e) {
+        console.error("Failed to read VRF config:", e.message);
+    }
 }
 
-main().catch(console.error);
+main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+});
