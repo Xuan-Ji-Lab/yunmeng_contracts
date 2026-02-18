@@ -9,6 +9,8 @@ lerna-debug.log*
 
 node_modules
 dist
+docs
+deploy
 dist-ssr
 *.local
 
@@ -22,3 +24,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment secrets - NEVER commit
+.env
+.env.*
+.env.example
+
+# Hardhat
+cache
+artifacts
+typechain-types
+coverage
+coverage.json
